@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIN3083 Final Interactive Presentation Deck</title>
+<style>
+:root {
+  --bg:#050816; --bg2:#081229; --panel:rgba(12,22,48,.72); --panel2:rgba(18,33,68,.58);
+  --line:rgba(142,178,255,.24); --muted:#92a7cc; --text:#edf6ff; --cyan:#39d7ff;
+  --blue:#5b8cff; --purple:#a070ff; --green:#26f3a0; --red:#ff5f7f; --orange:#ffb547;
+  --shadow:0 24px 80px rgba(0,0,0,.42); --radius:24px;
+}
+*{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+body{background:radial-gradient(circle at 12% 8%,rgba(57,215,255,.20),transparent 30%),radial-gradient(circle at 86% 18%,rgba(160,112,255,.17),transparent 30%),linear-gradient(135deg,#050816,#081229 56%,#030511);}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.15;background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px, transparent 1px);background-size:40px 40px;mask-image:radial-gradient(circle at 50% 50%, black, transparent 85%);z-index:0}
+.deck{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;padding:18px;width:100vw;height:100vh;transition:grid-template-columns .25s ease;}
+.deck.formal{grid-template-columns:1fr;padding:0;background:#050816;}
+.stage{position:relative;width:100%;height:100%;border-radius:26px;overflow:hidden;background:linear-gradient(180deg,rgba(9,17,38,.95),rgba(6,11,27,.96));border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow);}
+.deck.formal .stage{border-radius:0;border:0;box-shadow:none;}
+.slide{position:absolute;inset:0;padding:46px 56px 74px;opacity:0;visibility:hidden;transform:translateX(20px) scale(.985);transition:opacity .25s ease,transform .25s ease,visibility .25s ease;overflow:hidden;}
+.slide.active{opacity:1;visibility:visible;transform:translateX(0) scale(1);}
+.deck.formal .slide{padding:54px 68px 82px;}
+.kicker{font-size:13px;letter-spacing:.17em;text-transform:uppercase;color:var(--cyan);font-weight:900;opacity:.96}
+h1{font-size:58px;line-height:1.02;letter-spacing:-.055em;margin:14px 0 16px;font-weight:950;}
+h2{font-size:40px;line-height:1.08;letter-spacing:-.035em;margin:6px 0 12px;font-weight:930;}
+h3{font-size:22px;margin:0 0 10px;font-weight:900;}
+p{color:#c8d7f0;line-height:1.55;font-size:18px;margin:8px 0;}
+.accent{background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.muted{color:var(--muted)} .small{font-size:14px;color:var(--muted);line-height:1.45}
+.grid{display:grid;gap:18px} .cols2{grid-template-columns:1fr 1fr} .cols3{grid-template-columns:repeat(3,1fr)} .cols4{grid-template-columns:repeat(4,1fr)}
+.card{border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(19,35,72,.70),rgba(9,17,38,.54));box-shadow:0 16px 42px rgba(0,0,0,.22);padding:22px;position:relative;overflow:hidden;}
+.card:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.075),transparent 30%);pointer-events:none}
+.card>*{position:relative;z-index:1}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(57,215,255,.32);background:rgba(57,215,255,.10);color:#c6f5ff;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:850;letter-spacing:.04em;}
+.btn{appearance:none;border:1px solid rgba(126,171,255,.30);background:rgba(13,26,59,.82);color:#eaf3ff;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:850;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.18);transition:transform .15s,background .15s,border .15s,box-shadow .15s;}
+.btn:hover{transform:translateY(-2px);background:rgba(30,56,116,.88);border-color:rgba(57,215,255,.45);}
+.btn.primary,.btn.active{background:linear-gradient(135deg,rgba(57,215,255,.26),rgba(160,112,255,.24));border-color:rgba(57,215,255,.62);box-shadow:0 0 0 1px rgba(57,215,255,.12),0 14px 34px rgba(57,215,255,.16);}
+.btn.danger{border-color:rgba(255,95,127,.42);background:rgba(255,95,127,.11)}
+.deck-nav{position:absolute;left:18px;right:18px;bottom:14px;height:44px;display:flex;align-items:center;gap:10px;z-index:30;pointer-events:auto;}
+.nav-left,.nav-right{display:flex;align-items:center;gap:8px}
+.nav-right{margin-left:auto}
+.dots{display:flex;align-items:center;gap:6px;flex:1;justify-content:center}
+.dot{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.18);cursor:pointer;transition:.18s}
+.dot.active{width:28px;background:linear-gradient(90deg,var(--cyan),var(--purple));border-color:rgba(57,215,255,.52)}
+.progress{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.07);z-index:31}
+.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .25s ease}
+.cue-panel{border-radius:26px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(9,17,38,.92),rgba(7,12,27,.88));box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;}
+.deck.formal .cue-panel{display:none}
+.cue-head{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cue-title{font-weight:950;font-size:16px;letter-spacing:-.01em}
+.cue-body{padding:18px;overflow:auto;min-height:0;flex:1}
+.cue-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.meta-box{border-radius:14px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);padding:10px}
+.meta-box .label{font-size:11px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:850;margin-bottom:4px}
+.meta-box .value{font-size:15px;font-weight:900}
+.cue-script{font-size:14px;line-height:1.5;color:#d7e6ff;background:rgba(57,215,255,.07);border-left:3px solid var(--cyan);border-radius:12px;padding:12px 14px;margin:12px 0}
+.cue-list{display:grid;gap:10px;margin-top:12px}
+.cue-item{font-size:13.5px;line-height:1.45;color:#cddcf4;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);padding:10px;border-radius:12px}
+.thumb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.thumb{text-align:left;border-radius:12px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);color:#d9e8ff;padding:9px 8px;font-size:12px;line-height:1.25;cursor:pointer}
+.thumb.active{border-color:rgba(57,215,255,.55);background:rgba(57,215,255,.12)}
+.overlay{position:fixed;inset:0;background:rgba(2,6,23,.76);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:50px}
+.overlay.open{display:flex}
+.overview-card{width:min(1120px,94vw);border-radius:30px;background:linear-gradient(180deg,rgba(15,23,42,.96),rgba(2,6,23,.94));border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow);padding:28px}
+.overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.overview-slide{min-height:118px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);padding:14px;cursor:pointer;transition:.15s}
+.overview-slide:hover{transform:translateY(-3px);border-color:rgba(57,215,255,.45)}
+.overview-slide .num{color:var(--cyan);font-size:13px;font-weight:900}
+.overview-slide .name{font-size:15px;font-weight:900;margin:6px 0}
+.overview-slide .speaker{font-size:12px;color:var(--muted)}
+
+/* ================= EDITABLE SPEAKER ASSIGNMENT BOARD ================= */
+.overview-card{max-height:92vh;overflow:auto;}
+.overview-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.overview-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.assignment-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.member-summary{border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.045);padding:12px 14px}
+.member-summary b{font-size:15px}.member-summary span{display:block;margin-top:4px;color:var(--muted);font-size:12px}.member-summary.active{border-color:rgba(57,215,255,.46);background:rgba(57,215,255,.10)}
+.overview-slide{display:flex;flex-direction:column;gap:10px;text-align:left}
+.overview-slide .overview-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.assignment-pill{border-radius:999px;padding:5px 9px;border:1px solid rgba(57,215,255,.30);background:rgba(57,215,255,.08);font-size:11px;color:#c6f5ff;font-weight:900}
+.assignment-pill.unassigned{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.055);color:#a9b8d0}
+.speaker-select{width:100%;appearance:none;border:1px solid rgba(126,171,255,.28);background:rgba(2,6,23,.58);color:#edf6ff;border-radius:13px;padding:10px 12px;font-weight:850;outline:none;cursor:pointer}
+.speaker-select:focus{border-color:rgba(57,215,255,.70);box-shadow:0 0 0 3px rgba(57,215,255,.12)}
+.overview-jump{width:100%;padding:8px 10px;border-radius:12px;font-size:12px;margin-top:0}
+.assignment-help{margin-top:10px;border-radius:16px;background:rgba(57,215,255,.07);border:1px solid rgba(57,215,255,.20);padding:10px 12px;color:#cfefff;font-size:13px;line-height:1.45}
+@media (max-width:1200px){.assignment-summary{grid-template-columns:repeat(2,1fr)}}
+
+.embed-wrap{position:absolute;left:34px;right:34px;top:30px;bottom:62px;border-radius:28px;overflow:hidden;border:1px solid rgba(255,255,255,.13);box-shadow:var(--shadow);background:#040815;}
+.embed-wrap iframe{width:100%;height:100%;border:0;display:block;background:#050916;}
+.embed-note{position:absolute;left:58px;top:40px;z-index:4;display:flex;gap:10px;align-items:center;pointer-events:none}
+.deck.formal .embed-wrap{left:0;right:0;top:0;bottom:0;border-radius:0;border:0}
+.deck.formal .embed-note{display:none}
+.title-layout{height:100%;display:grid;grid-template-columns:1.18fr .82fr;gap:28px;align-items:center}
+.big-number{font-size:56px;font-weight:950;letter-spacing:-.05em;line-height:1;color:var(--cyan)}
+.timeline{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:20px}
+.timeline .step{padding:18px;border-radius:18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}
+.step strong{display:block;font-size:18px;margin-bottom:8px}
+.mechanism{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0}
+.mech-box{flex:1;text-align:center;padding:18px;border-radius:20px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10)}
+.arrow{font-size:30px;color:var(--cyan);font-weight:900}
+.table{width:100%;border-collapse:separate;border-spacing:0 9px}
+.table th{font-size:12px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);text-align:left;padding:0 12px 4px}
+.table td{background:rgba(15,23,42,.58);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);padding:12px;font-size:15px}
+.table td:first-child{border-left:1px solid rgba(255,255,255,.08);border-radius:14px 0 0 14px;font-weight:850}
+.table td:last-child{border-right:1px solid rgba(255,255,255,.08);border-radius:0 14px 14px 0}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c4b5fd;background:#020617;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;font-size:17px;line-height:1.65}
+.switch-panel{display:none;animation:fade .22s ease both}.switch-panel.active{display:block}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.lim-list{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.lim{display:flex;gap:12px;padding:16px;border-radius:18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}
+.lim .icon{font-size:26px;line-height:1}
+.qa{padding:16px 18px;border-radius:18px;background:rgba(15,23,42,.58);border:1px solid rgba(255,255,255,.10);margin-top:12px;font-size:16px;line-height:1.45;color:#dce9ff}
+.qa strong{color:#e7f9ff}
+.kbd{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:2px 7px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);font-weight:900;color:#dce9ff;font-size:12px}
+.skip-tip{position:absolute;right:56px;top:48px;z-index:20;color:#b9c7df;font-size:13px;background:rgba(2,6,23,.58);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:9px 12px}
+.deck.formal .skip-tip{right:24px;top:18px;opacity:.72}
+@media (max-width:1200px){.deck{grid-template-columns:1fr}.cue-panel{display:none}.stage{border-radius:0}.slide{padding:34px 38px 70px}h1{font-size:46px}h2{font-size:34px}.title-layout,.cols2,.cols3,.cols4,.lim-list{grid-template-columns:1fr}.timeline{grid-template-columns:1fr}.overview-grid{grid-template-columns:repeat(2,1fr)}}
+
+
+/* ================= CUE-FREE FINAL VERSION =================
+   Speaker notes/cues are intentionally hidden for formal use.
+   Slide navigation and in-slide interactions remain fully available. */
+.deck, .deck.practice, .deck.formal { grid-template-columns: 1fr !important; padding: 0 !important; background: #050816 !important; }
+.stage, .deck.formal .stage { border-radius: 0 !important; border: 0 !important; box-shadow: none !important; }
+.slide, .deck.formal .slide { padding: 54px 68px 82px !important; }
+.cue-panel, #cuePanel, #modeBtn, .cue-script, .cue-list, .cue-item { display: none !important; }
+.nav-right { gap: 10px; }
+/* Hide any cue boxes inside parent slides if present. */
+.cue, #cue, [data-role="speaker-cue"] { display: none !important; }
+
+
+
+/* ================= CLEAN PRESENTATION POLISH V2 =================
+   Removed non-content overlay labels and fixed Data Processing layout. */
+.embed-note, .skip-tip { display: none !important; }
+/* Keep slide content above bottom navigation without cropping. */
+.data-processing-slide h2 { font-size: 38px; margin-bottom: 8px; }
+.data-processing-slide > p { font-size: 20px !important; line-height: 1.45 !important; margin-bottom: 0 !important; }
+.data-processing-slide .dp-grid { height: calc(100% - 150px); margin-top: 16px !important; gap: 20px !important; }
+.data-processing-slide .dp-card { height: 100%; overflow: hidden; padding: 18px !important; }
+.data-processing-slide #processButtons { gap: 8px !important; margin-bottom: 12px !important; }
+.data-processing-slide #processButtons .btn { min-height: 46px !important; font-size: 11px !important; padding: 8px 6px !important; }
+.data-processing-slide #processDetailWrap { min-height: 206px !important; height: 206px !important; padding: 16px !important; }
+.data-processing-slide #processDetail .big-number { font-size: 30px !important; }
+.data-processing-slide #processDetail p { font-size: 16px !important; line-height: 1.42 !important; }
+.data-processing-slide .dp-stats { margin-top: 12px !important; }
+.data-processing-slide .dp-stats .card { padding: 10px !important; }
+.data-processing-slide .dp-stats .big-number { font-size: 23px !important; }
+.data-processing-slide #processFlow { gap: 7px !important; }
+.data-processing-slide #processFlow .flow-row { padding: 8px 11px !important; border-radius: 13px !important; }
+.data-processing-slide #processFlow .flow-row b { font-size: 14px !important; }
+.data-processing-slide #processFlow .flow-row .small { font-size: 12px !important; line-height: 1.25 !important; }
+.data-processing-slide .process-note-card { margin-top: 10px !important; padding: 12px 14px !important; height: 118px !important; overflow: hidden; }
+.data-processing-slide #processCode { font-size: 11.5px !important; line-height: 1.28 !important; max-height: 72px; overflow: hidden; }
+
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div id="deck" class="deck practice">
+  <main class="stage" id="stage" tabindex="0" aria-label="Interactive slide deck">
+
+    <section class="slide active" data-title="Title" data-speaker="" data-time="0:30" data-cue="Open with the research title and signal that this is not a normal MA/MACD strategy. It is a microstructure hypothesis test using Level-2 order book data." data-actions="No button needed. Set the tone: reversal or continuation?">
+      <div class="title-layout">
+        <div>
+          <div class="kicker">FIN3083 · Financial Big Data Analytics</div>
+          <h1>Order Book Imbalance &<br><span class="accent">Spread Widening</span></h1>
+          <p style="font-size:23px;max-width:760px">A market microstructure strategy testing whether liquidity stress leads to <b style="color:#c6f5ff">reversal</b> or <b style="color:#ffd1d8">continuation</b> in the Chinese A-share market.</p>
+          <div class="timeline">
+            <div class="step"><strong>Original idea</strong><span class="small">Liquidity shock may trigger short-term rebound.</span></div>
+            <div class="step"><strong>Backtest design</strong><span class="small">OOS thresholds + execution-aware returns.</span></div>
+            <div class="step"><strong>Final finding</strong><span class="small">Continuation dominates reversal.</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="pill">15-min group presentation</div>
+          <h2 style="margin-top:18px">Editable speaking map</h2>
+          <p class="small" style="font-size:15px;margin-top:4px">Open <b>Overview</b> to assign each slide to Kivo, Ren, or Steven. The assignment board is editable during rehearsal and does not lock the presentation order.</p>
+          <div class="grid" style="gap:12px;margin-top:14px">
+            <div class="card" style="padding:16px"><b>Kivo</b><div class="small">Can be assigned to technical or results slides.</div></div>
+            <div class="card" style="padding:16px"><b>Ren</b><div class="small">Can be assigned to data, variables, or limitations.</div></div>
+            <div class="card" style="padding:16px"><b>Steven</b><div class="small">Can be assigned to story, interpretation, or conclusion.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Research Question" data-speaker="" data-time="1:00" data-cue="State the core question clearly. The project is not trying to force a profitable strategy; it tests whether liquidity stress is followed by mean reversion or further pressure." data-actions="Optional: click the two hypothesis buttons to contrast reversal and continuation.">
+      <div class="kicker">Strategy overview</div><h2>Research question</h2>
+      <p style="font-size:25px;max-width:980px">When the order book shows <b>extreme negative imbalance</b> and the bid-ask spread widens, does price <span class="accent">reverse</span> or <span style="color:#ffb7c4;font-weight:900">continue</span>?</p>
+      <div class="cols2 grid" style="margin-top:28px">
+        <div class="card">
+          <h3>Why this is microstructure-based</h3>
+          <p>Order book imbalance reflects visible liquidity pressure. Spread widening reflects worse immediacy and higher trading friction.</p>
+          <div class="mechanism"><div class="mech-box">OBI ↓</div><div class="arrow">+</div><div class="mech-box">Spread ↑</div><div class="arrow">→</div><div class="mech-box">Liquidity stress</div></div>
+        </div>
+        <div class="card">
+          <h3>Two competing interpretations</h3>
+          <div style="display:flex;gap:10px;margin:12px 0 16px"><button class="btn active" onclick="toggleHyp(0,this)">Reversal hypothesis</button><button class="btn" onclick="toggleHyp(1,this)">Continuation finding</button></div>
+          <div id="hyp0" class="switch-panel active"><div class="big-number">Reversal?</div><p>Initial idea: liquidity shock may cause temporary overreaction, followed by a short-term rebound.</p></div>
+          <div id="hyp1" class="switch-panel"><div class="big-number" style="color:var(--red)">Continuation.</div><p>Empirical result: OOS execution-aware returns are significantly negative, so pressure continues after the signal.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Interactive Intuition" data-speaker="" data-time="1:30" data-cue="This page is intentionally one of the old interactive pages. Click Normal → Negative OBI → Spread widens → Finding. If time is tight, click only Finding and move on." data-actions="Buttons inside the embedded page are independent. Use them only if you have time; slide navigation remains separate.">
+      <div class="embed-wrap"><iframe title="Liquidity Shock Mechanism" data-srcdoc="liquidity"></iframe></div>
+    </section>
+
+    <section class="slide" data-title="Data Source" data-speaker="" data-time="1:20" data-cue="Explain that Level-2 order book data is essential because the strategy is based on five-level bid and ask queues, not daily price bars." data-actions="Optional: click the dataset chips to reveal details.">
+      <div class="kicker">Data and implementation</div><h2>Data source</h2>
+      <div class="cols2 grid" style="align-items:stretch;margin-top:24px">
+        <div class="card">
+          <h3>A-share Level-2 high-frequency snapshots</h3>
+          <p>The sample contains five-level bid and ask prices and volumes for three stocks: <b>000001</b>, <b>600519</b>, and <b>002611</b>.</p>
+          <div class="grid cols3" style="margin-top:18px">
+            <button class="btn active" onclick="showData(0,this)">000001</button><button class="btn" onclick="showData(1,this)">600519</button><button class="btn" onclick="showData(2,this)">002611</button>
+          </div>
+          <div id="dataDetail" class="card" style="margin-top:16px;padding:18px;background:rgba(57,215,255,.08)"><b>Ping An Bank</b><div class="small">Large financial stock; signal is rare in OOS, useful as a contrast case.</div></div>
+        </div>
+        <div class="card">
+          <h3>Preprocessing summary</h3>
+          <table class="table"><tr><th>Layer</th><th>Purpose</th></tr>
+          <tr><td>Raw universe</td><td>Start from a large A-share Level-2 dataset, then select three target stocks.</td></tr>
+          <tr><td>Python preprocessing</td><td>Batch extract 7z archives and merge stock-level CSV files before SAS import.</td></tr>
+          <tr><td>Trading-session filter</td><td>Remove non-continuous periods such as auction, lunch break, and closing stage.</td></tr>
+          <tr><td>Research panel</td><td>Validate quotes, construct microstructure variables, and split IS/OOS.</td></tr></table>
+          <div class="small" style="margin-top:12px">The next slide shows the full processing pipeline.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide data-processing-slide" data-title="Data Processing" data-speaker="" data-time="1:20" data-cue="" data-actions="">
+      <div class="kicker">Data preparation before backtesting</div><h2>Data processing pipeline</h2>
+      <p style="max-width:1060px;color:var(--muted);margin-top:4px">From a large raw A-share Level-2 universe to three clean, stock-level microstructure panels used by the SAS backtest.</p>
+      <div class="cols2 grid dp-grid" style="grid-template-columns:1.05fr .95fr;align-items:stretch">
+        <div class="card dp-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+            <h3 style="margin:0">Pipeline controller</h3><span class="pill" id="processPill">Step 1 / 8</span>
+          </div>
+          <div id="processButtons" style="display:grid;grid-template-columns:repeat(4,1fr);"></div>
+          <div id="processDetailWrap" class="card" style="background:rgba(57,215,255,.075);">
+            <div id="processDetail"></div>
+          </div>
+          <div class="grid cols4 dp-stats" style="gap:10px">
+            <div class="card" style="text-align:center"><div class="big-number">5,000+</div><div class="small">raw A-share stocks</div></div>
+            <div class="card" style="text-align:center"><div class="big-number">3</div><div class="small">target stocks</div></div>
+            <div class="card" style="text-align:center"><div class="big-number">≈3s</div><div class="small">snapshot frequency</div></div>
+            <div class="card" style="text-align:center"><div class="big-number">70/30</div><div class="small">IS / OOS split</div></div>
+          </div>
+        </div>
+        <div class="card dp-card">
+          <h3 style="margin-top:0;margin-bottom:10px">From raw files to research-ready panel</h3>
+          <div id="processFlow" style="display:grid;"></div>
+          <div class="card process-note-card" style="background:rgba(0,0,0,.22)">
+            <div class="small" style="text-transform:uppercase;letter-spacing:.12em;font-weight:900;margin-bottom:6px;color:#bfeeff">Implementation note</div>
+            <pre id="processCode" style="margin:0;white-space:pre-wrap;color:#ddecff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="slide" data-title="Variables" data-speaker="" data-time="1:30" data-cue="Walk through variables. Say explicitly that OFI is a simplified proxy, not the full classical OFI. This protects the methodology from overclaiming." data-actions="No need to click every row. Highlight OBI and relative spread as the two signal variables.">
+      <div class="kicker">Market microstructure variables</div><h2>Key variables</h2>
+      <div class="card" style="margin-top:20px">
+        <table class="table"><tr><th>Variable</th><th>Definition</th><th>Interpretation</th></tr>
+          <tr><td>Mid-price</td><td>(best ask + best bid) / 2</td><td>Reference quote price</td></tr>
+          <tr><td>Relative spread</td><td>(ask − bid) / mid-price</td><td>Liquidity cost and immediacy friction</td></tr>
+          <tr><td>OBI</td><td>(bid depth − ask depth) / total depth</td><td>Visible pressure across five order-book levels</td></tr>
+          <tr><td>OFI proxy</td><td>Change in best bid queue − change in best ask queue</td><td>Simplified short-term queue-pressure proxy</td></tr>
+          <tr><td>Micro-price</td><td>Depth-weighted quote price</td><td>Imbalance-adjusted reference price</td></tr>
+        </table>
+      </div>
+      <div class="cols2 grid" style="margin-top:18px">
+        <div class="card"><h3>Core signal inputs</h3><p><b>OBI</b> captures order-book pressure. <b>Relative spread</b> captures liquidity deterioration. Their joint occurrence is interpreted as liquidity stress.</p></div>
+        <div class="card"><h3>Important wording</h3><p>We use a <b>simplified OFI proxy</b>, not the full classical price-change-adjusted OFI.</p></div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="SAS Workflow" data-speaker="" data-time="1:25" data-cue="This is the second old interactive page integrated into the final deck. The technical speaker should use the buttons to walk through the SAS workflow. If time is tight, click Auto or just describe the pipeline." data-actions="Recommended clicks: Raw Data → Variables → IS/OOS → Evaluation.">
+      <div class="embed-wrap"><iframe title="SAS Backtest Engine" data-srcdoc="workflow"></iframe></div>
+    </section>
+
+    <section class="slide" data-title="Signal & OOS" data-speaker="" data-time="1:25" data-cue="Explain the actual threshold rule and why it avoids look-ahead bias. This slide is independent from the navigation; buttons reveal formulas and bias-control points." data-actions="Click Signal rule first, then OOS split, then No future leakage.">
+      <div class="kicker">Methodology</div><h2>Signal construction and OOS design</h2>
+      <div style="display:flex;gap:10px;margin:16px 0 20px"><button class="btn active" onclick="showMethod(0,this)">Signal rule</button><button class="btn" onclick="showMethod(1,this)">OOS split</button><button class="btn" onclick="showMethod(2,this)">No leakage</button></div>
+      <div class="cols2 grid">
+        <div class="card">
+          <div id="method0" class="switch-panel active"><h3>Main signal</h3><div class="formula">Signal = 1 if<br>OBI_5 &lt; P10(OBI_5, in-sample)<br>and<br>Relative Spread &gt; P90(Spread, in-sample)</div><p>Negative OBI plus wide spread is interpreted as a liquidity-stress event.</p></div>
+          <div id="method1" class="switch-panel"><h3>70% / 30% split</h3><div class="formula">In-sample: estimate thresholds<br>Out-of-sample: generate signals and evaluate returns</div><p>This improves statistical credibility and reduces overfitting.</p></div>
+          <div id="method2" class="switch-panel"><h3>No future leakage</h3><div class="formula">Decision at time t uses only information visible at time t.<br>Future quotes are used only for return evaluation.</div><p>This is critical for high-frequency backtesting.</p></div>
+        </div>
+        <div class="card">
+          <h3>What the technical speaker should emphasize</h3>
+          <div class="timeline" style="grid-template-columns:1fr;margin-top:10px">
+            <div class="step"><strong>Thresholds are in-sample only</strong><span class="small">No future OOS data is used to calibrate the signal.</span></div>
+            <div class="step"><strong>Signals are OOS only</strong><span class="small">The empirical results are not fitted on the same data.</span></div>
+            <div class="step"><strong>Multiple horizons</strong><span class="small">5s, 10s, 30s, and 60s are all tested.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Execution Return" data-speaker="" data-time="1:35" data-cue="This is the third old interactive page. This should be the technical speaker’s most important slide. Let him click mid-price vs execution-aware and explain why mid-price can overstate alpha." data-actions="Recommended clicks: Mid reference → Execution aware → 10s horizon → Cost. Do not spend more than 90 seconds here.">
+      <div class="embed-wrap"><iframe title="Execution-Aware Return" data-srcdoc="execution"></iframe></div>
+    </section>
+
+    <section class="slide" data-title="Results Dashboard" data-speaker="" data-time="2:10" data-cue="This is the old results control room. Use tabs in order: Signals, Returns, T-test, Alpha Decay, Conclusion. If time is short, click Returns → T-test → Conclusion only." data-actions="Recommended clicks: Signals → Returns → T-test → Conclusion.">
+      <div class="embed-wrap"><iframe title="Results Control Room" data-srcdoc="results"></iframe></div>
+    </section>
+
+    <section class="slide" data-title="Interpretation" data-speaker="" data-time="1:20" data-cue="Translate the empirical numbers into the core finding. Avoid saying strategy failed. Say the reversal hypothesis is rejected and the signal contains information in the continuation direction." data-actions="Click the three evidence buttons if time allows.">
+      <div class="kicker">Interpretation</div><h2>What did the data actually reject?</h2>
+      <div class="cols2 grid" style="margin-top:20px">
+        <div class="card"><h3>Original reversal interpretation</h3><p>Negative OBI + wide spread may represent temporary overreaction. If true, execution-aware returns after the signal should be positive.</p></div>
+        <div class="card"><h3>Empirical continuation interpretation</h3><p>Execution-aware returns are negative and statistically significant. The shock is not finished; price pressure continues.</p></div>
+      </div>
+      <div style="display:flex;gap:10px;margin:20px 0"><button class="btn active" onclick="showEvidence(0,this)">Evidence 1</button><button class="btn" onclick="showEvidence(1,this)">Evidence 2</button><button class="btn" onclick="showEvidence(2,this)">Final line</button></div>
+      <div class="card">
+        <div id="ev0" class="switch-panel active"><h3>OOS execution returns</h3><p>Average execution-aware returns are mostly negative across stocks and horizons. This contradicts immediate mean reversion.</p></div>
+        <div id="ev1" class="switch-panel"><h3>10-second t-test</h3><p>The 10-second execution returns are significantly negative. The opposite direction is not just random noise.</p></div>
+        <div id="ev2" class="switch-panel"><h3>Core finding</h3><p style="font-size:24px;color:#dffcff"><b>The signal is informative, but the information is in the continuation direction rather than the reversal direction.</b></p></div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Limitations" data-speaker="" data-time="1:30" data-cue="Do not apologize for the project. Limitations show critical thinking. Mention only the important ones and connect each to future work." data-actions="Optional: click limitation cards only if the audience has time.">
+      <div class="kicker">Robustness, limitations, future work</div><h2>Critical evaluation</h2>
+      <div class="lim-list">
+        <div class="lim"><div class="icon">📌</div><div><b>Limited stock universe</b><div class="small">Only three A-share stocks. Future work should test a broader universe and market-cap groups.</div></div></div>
+        <div class="lim"><div class="icon">🧪</div><div><b>Simplified OFI proxy</b><div class="small">We use queue-volume changes, not full price-change-adjusted OFI.</div></div></div>
+        <div class="lim"><div class="icon">💸</div><div><b>Execution model</b><div class="small">Entry at ask and exit at bid is conservative, but market impact and queue priority are still simplified.</div></div></div>
+        <div class="lim"><div class="icon">🔁</div><div><b>Natural extension</b><div class="small">Test a short-side continuation strategy on a new OOS sample to avoid hindsight fitting.</div></div></div>
+      </div>
+      <div class="card" style="margin-top:22px"><h3>Why this still works as a project</h3><p>The project demonstrates hypothesis testing, OOS design, transaction-cost-aware thinking, and critical interpretation of microstructure evidence.</p></div>
+    </section>
+
+    <section class="slide" data-title="Conclusion & Q&A" data-speaker="" data-time="0:50" data-cue="End with one sentence. Then prepare for Q&A. Technical questions can be answered by the code speaker; interpretation and data questions can be handled by the assigned speakers." data-actions="Optional: click Q&A cards during practice, not necessarily in formal mode.">
+      <div class="kicker">Final conclusion</div><h2>Conclusion: continuation rather than reversal</h2>
+      <div class="card" style="margin-top:20px;text-align:center;padding:40px"><div class="big-number" style="font-size:42px;line-height:1.15">Reversal hypothesis rejected.<br><span style="color:var(--red)">Continuation supported.</span></div><p style="font-size:20px;margin-top:18px">OBI + spread widening captures liquidity stress, but the stress continues instead of immediately reversing in our A-share sample.</p></div>
+      <div class="cols3 grid" style="margin-top:20px">
+        <div class="qa"><strong>Why not short it?</strong><br>Natural future work; must test on new OOS data to avoid data mining.</div>
+        <div class="qa"><strong>Why no annualized return?</strong><br>Second-level event strategy; per-trade execution return and t-test are more appropriate.</div>
+        <div class="qa"><strong>Is OFI standard?</strong><br>No. It is a simplified queue-pressure proxy, acknowledged as a limitation.</div>
+      </div>
+    </section>
+
+    <div class="deck-nav">
+      <div class="nav-left"><button class="btn" id="prevBtn">← Prev</button><button class="btn primary" id="overviewBtn">Overview</button></div>
+      <div class="dots" id="dots"></div>
+      <div class="nav-right"><button class="btn" id="modeBtn">Practice: cues ON</button><button class="btn" id="fullBtn">Full screen</button><button class="btn" id="nextBtn">Next →</button></div>
+    </div><div class="progress"><span id="progressBar"></span></div>
+  </main>
+
+  <aside class="cue-panel" id="cuePanel">
+    <div class="cue-head"><div><div class="cue-title">Speaker Cue</div><div class="small">Press <span class="kbd">P</span> for formal mode</div></div><span class="pill" id="slideCounter">1 / 12</span></div>
+    <div class="cue-body">
+      <div class="cue-meta"><div class="meta-box"><div class="label">Speaker</div><div class="value" id="cueSpeaker">Steven</div></div><div class="meta-box"><div class="label">Target time</div><div class="value" id="cueTime">0:30</div></div></div>
+      <div class="meta-box"><div class="label">Slide</div><div class="value" id="cueTitle">Title</div></div>
+      <div class="cue-script" id="cueText"></div>
+      <div class="cue-list"><div class="cue-item" id="cueActions"></div><div class="cue-item"><b>Navigation:</b> use slide dots, Overview, or ←/→. Interactions inside a slide are optional and do not force navigation.</div></div>
+      <div class="thumb-grid" id="thumbGrid"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="overlay" id="overview"><div class="overview-card">
+  <div class="overview-top">
+    <div>
+      <div class="kicker">Free slide navigation + editable speaker assignment</div>
+      <h2 style="margin:8px 0 0">Overview & speaker assignment</h2>
+      <div class="assignment-help">Choose who presents each slide. These assignments are stored in this browser and can be changed anytime. Clicking a slide card jumps to that slide; changing a dropdown will not navigate.</div>
+    </div>
+    <div class="overview-actions">
+      <button class="btn" id="copyAssignmentsBtn">Copy plan</button>
+      <button class="btn danger" id="resetAssignmentsBtn">Clear speakers</button>
+      <button class="btn danger" id="closeOverview">Close</button>
+    </div>
+  </div>
+  <div class="assignment-summary" id="assignmentSummary"></div>
+  <div class="overview-grid" id="overviewGrid"></div>
+  <p class="small" style="margin-top:14px">Speaker names available: <b>Kivo</b>, <b>Ren</b>, <b>Steven</b>. The deck still allows free slide navigation and in-slide interaction independently.</p>
+</div></div>
+
+<!-- Embedded old interactive pages as templates, preserving their original button systems. -->
+<template id="tpl-liquidity"><!DOCTYPE html><html><head><title>Interactive Liquidity Shock Mechanism</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+:root{
+  --bg0:#060b18; --bg1:#0a1330; --panel:rgba(12,22,48,.72); --panel2:rgba(15,28,62,.54);
+  --line:rgba(132,180,255,.22); --muted:#8ea2c6; --text:#edf5ff; --cyan:#39d7ff;
+  --blue:#4c85ff; --purple:#a070ff; --green:#27f3a0; --red:#ff5f7f; --orange:#ffb547;
+  --shadow: 0 18px 60px rgba(0,0,0,.40); --radius:24px;
+}
+*{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050916;color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+body{background:radial-gradient(circle at 18% 8%, rgba(57,215,255,.22), transparent 28%),radial-gradient(circle at 83% 18%, rgba(160,112,255,.20), transparent 30%),linear-gradient(140deg,var(--bg0),var(--bg1) 55%,#030611);}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.17;background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px, transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at 50% 50%, black, transparent 84%)}
+.slide{position:relative;width:100vw;height:100vh;padding:3.8vh 3.6vw;display:flex;flex-direction:column;gap:1.8vh;}
+.kicker{font-size:1.0vw;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:800;opacity:.95}.title{font-size:3.05vw;line-height:1.02;font-weight:900;letter-spacing:-.05em;margin:.3vh 0}.subtitle{font-size:1.15vw;color:var(--muted);line-height:1.45;max-width:75vw}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1.6vw;min-height:0;flex:1}.panel{background:linear-gradient(180deg,rgba(20,37,76,.76),rgba(8,16,36,.64));border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius);position:relative;overflow:hidden}.panel:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.09),transparent 30%);pointer-events:none}.panel-inner{position:relative;z-index:1;height:100%;padding:1.2vw}.panel-title{font-size:1.1vw;font-weight:850;color:#d9e8ff;margin-bottom:1vh;display:flex;align-items:center;gap:.6vw}.pill{display:inline-flex;align-items:center;gap:.35vw;padding:.38vw .7vw;border:1px solid rgba(99,214,255,.26);background:rgba(57,215,255,.10);border-radius:999px;color:#bff4ff;font-size:.75vw;font-weight:800;letter-spacing:.03em}.controls{display:flex;align-items:center;gap:.65vw;flex-wrap:wrap}.btn{appearance:none;border:1px solid rgba(120,170,255,.32);background:rgba(13,26,59,.78);color:#dfeeff;border-radius:14px;padding:.72vw .95vw;font-size:.86vw;font-weight:800;letter-spacing:.01em;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.18);transition:transform .16s,background .16s,border .16s,box-shadow .16s}.btn:hover{transform:translateY(-2px);background:rgba(34,59,116,.86);box-shadow:0 12px 28px rgba(57,215,255,.12)}.btn.active,.btn.primary{background:linear-gradient(135deg,rgba(57,215,255,.25),rgba(160,112,255,.26));border-color:rgba(57,215,255,.65);box-shadow:0 0 0 1px rgba(57,215,255,.12),0 12px 35px rgba(57,215,255,.18)}.btn.warn{border-color:rgba(255,95,127,.40);background:rgba(255,95,127,.10)}.hint{position:absolute;right:3.6vw;bottom:2.4vh;color:var(--muted);font-size:.82vw}.kbd{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);border-radius:7px;padding:.12vw .35vw;color:#dce9ff;font-weight:900}.cue,.kicker{display:none!important}.metric{display:flex;flex-direction:column;gap:.3vh}.metric .value{font-size:2vw;font-weight:950;letter-spacing:-.04em}.metric .label{font-size:.78vw;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:800}.glow{filter:drop-shadow(0 0 18px rgba(57,215,255,.36))}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1vw}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1vw}.small{font-size:.82vw;color:var(--muted);line-height:1.45}.tag{padding:.22vw .5vw;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:.72vw;font-weight:800;color:#d4e6ff}.footerbar{display:flex;align-items:center;justify-content:space-between;margin-top:.2vh}.progress{height:.45vh;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;flex:1}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .5s cubic-bezier(.2,.7,.2,1)}
+@media(max-aspect-ratio: 14/10){.title{font-size:3.6vw}.subtitle{font-size:1.5vw}.row{grid-template-columns:1fr}.panel-title{font-size:1.5vw}.btn{font-size:1.1vw}.hint{font-size:1.05vw}}
+</style>
+</head><body>
+<div class="noise"></div>
+<div class="slide">
+  <div><div class="kicker"></div><div class="title">Liquidity Shock Mechanism</div><div class="subtitle">Use the controls to move from a normal book to negative OBI, spread widening, and the empirical finding: continuation rather than reversal.</div></div>
+  <div class="row" style="grid-template-columns:1.05fr .95fr;">
+    <div class="panel"><div class="panel-inner">
+      <div class="panel-title">Live five-level order book <span class="pill" id="statePill">Normal book</span></div>
+      <div style="display:grid;grid-template-columns:1fr .78fr;gap:1vw;height:86%;">
+        <div>
+          <div id="book" style="height:100%;display:flex;flex-direction:column;justify-content:center;gap:.38vh;"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:space-between;gap:1vh;">
+          <div class="panel" style="box-shadow:none;border-radius:18px;"><div class="panel-inner" style="padding:1vw;">
+            <div class="metric"><div class="label">Order Book Imbalance</div><div class="value" id="obiVal">+0.05</div></div>
+            <div style="height:1.1vh;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin-top:1vh"><span id="obiGauge" style="display:block;height:100%;width:53%;background:linear-gradient(90deg,var(--red),var(--green));transition:width .6s"></span></div>
+          </div></div>
+          <div class="panel" style="box-shadow:none;border-radius:18px;"><div class="panel-inner" style="padding:1vw;">
+            <div class="metric"><div class="label">Relative Spread</div><div class="value" id="spreadVal">0.09%</div></div>
+            <div style="height:1.1vh;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin-top:1vh"><span id="spreadGauge" style="display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--green),var(--orange),var(--red));transition:width .6s"></span></div>
+          </div></div>
+          <svg id="priceSvg" viewBox="0 0 300 160" style="width:100%;height:34%;overflow:visible">
+            <defs><linearGradient id="lineG" x1="0" x2="1"><stop offset="0" stop-color="#39d7ff"/><stop offset="1" stop-color="#ff5f7f"/></linearGradient></defs>
+            <rect x="0" y="0" width="300" height="160" rx="18" fill="rgba(255,255,255,.035)" stroke="rgba(255,255,255,.10)"/>
+            <text x="18" y="28" fill="#8ea2c6" font-size="12" font-weight="800">short-term price path</text>
+            <polyline id="pathLine" points="26,85 78,82 130,87 182,83 234,84 274,82" fill="none" stroke="url(#lineG)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle id="pulseDot" cx="26" cy="85" r="6" fill="#39d7ff"/>
+          </svg>
+        </div>
+      </div>
+    </div></div>
+    <div class="panel"><div class="panel-inner" style="display:flex;flex-direction:column;gap:1.1vh;">
+      <div class="panel-title">Narrative builder</div>
+      <div class="flow" id="flow" style="display:grid;gap:.78vh;"></div>
+      <div class="cue" id="cue"><b>Speaker cue:</b> Start with a normal book. The research question is whether a liquidity shock leads to reversal or continuation.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1vw;margin-top:auto;">
+        <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:1vw"><div class="metric"><div class="label">Original hypothesis</div><div class="value" style="font-size:1.45vw;color:var(--cyan)">Reversal</div></div><div class="small">Liquidity shock may cause short-term overreaction and rebound.</div></div></div>
+        <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:1vw"><div class="metric"><div class="label">Empirical finding</div><div class="value" style="font-size:1.45vw;color:var(--red)">Continuation</div></div><div class="small">OOS execution returns are negative after the signal.</div></div></div>
+      </div>
+    </div></div>
+  </div>
+  <div class="footerbar">
+    <div class="controls">
+      <button class="btn active" data-step="0">1 Normal</button><button class="btn" data-step="1">2 Negative OBI</button><button class="btn" data-step="2">3 Spread widens</button><button class="btn primary" data-step="3">4 Finding</button><button class="btn" id="auto">Auto</button><button class="btn warn" id="reset">Reset</button>
+    </div><div class="hint"><span class="kbd">1–4</span> step · <span class="kbd">Space</span> next · <span class="kbd">A</span> auto</div>
+  </div>
+</div>
+<script>
+const scenarios=[
+ {name:'Normal book',obi:0.05,spread:.09,bid:[78,62,49,39,28],ask:[70,56,47,36,26],node:0,cue:'Start with a normal book. OBI is close to balanced and spread is narrow, so there is no liquidity shock.',path:'26,85 78,82 130,87 182,83 234,84 274,82',dot:[274,82]},
+ {name:'Negative OBI',obi:-0.46,spread:.09,bid:[16,20,26,28,32],ask:[88,96,84,70,62],node:1,cue:'Now visible bid-side depth is much weaker than ask-side depth. This creates strong negative order book imbalance.',path:'26,80 78,88 130,98 182,105 234,109 274,114',dot:[274,114]},
+ {name:'Spread widening',obi:-0.51,spread:.29,bid:[14,18,25,31,35],ask:[96,103,92,73,65],node:2,cue:'When negative OBI and wide spread occur together, we interpret it as liquidity stress: immediacy is costly and liquidity provision retreats.',path:'26,78 78,92 130,108 182,118 234,124 274,130',dot:[274,130]},
+ {name:'Continuation evidence',obi:-0.51,spread:.29,bid:[14,18,25,31,35],ask:[96,103,92,73,65],node:4,cue:'The original reversal hypothesis is rejected. In our OOS execution-aware results, the signal is followed by continuation, not immediate rebound.',path:'26,74 78,88 130,109 182,123 234,132 274,139',dot:[274,139]}
+];
+const levels=['5','4','3','2','1'];
+const flowText=[['1','Negative OBI','Visible bid depth becomes weak relative to ask depth.'],['2','Spread widening','The cost of immediacy rises and liquidity deteriorates.'],['3','Original interpretation','Liquidity shock may imply temporary overreaction.'],['4','Empirical result','OOS execution returns support continuation > reversal.']];
+const book=document.getElementById('book'); const flow=document.getElementById('flow'); let step=0, timer=null;
+function row(side,lvl,val){let color=side==='ask'?'var(--red)':'var(--green)';let label=side==='ask'?`A${lvl}`:`B${lvl}`;let price=side==='ask'?(100.00+lvl*.01).toFixed(2):(100.00-lvl*.01).toFixed(2);return `<div style="display:grid;grid-template-columns:2.4vw 4vw 1fr 3.4vw;align-items:center;gap:.5vw;font-size:.8vw"><b style="color:${color}">${label}</b><span style="color:#9eb2d5">${price}</span><div style="height:1.7vh;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden"><span style="display:block;height:100%;width:${Math.min(100,val)}%;background:${color};transition:width .7s cubic-bezier(.2,.7,.2,1);box-shadow:0 0 16px ${color}"></span></div><span style="text-align:right;color:#dce9ff;font-weight:800">${val}</span></div>`}
+function renderBook(s){book.innerHTML=''; for(let i=4;i>=0;i--)book.insertAdjacentHTML('beforeend',row('ask',levels[i],s.ask[i])); book.insertAdjacentHTML('beforeend','<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.38),transparent);margin:.45vh 0"></div>'); for(let i=0;i<5;i++)book.insertAdjacentHTML('beforeend',row('bid',levels[i],s.bid[i]));}
+function renderFlow(active){flow.innerHTML=flowText.map((f,i)=>`<div style="display:grid;grid-template-columns:2.4vw 1fr;gap:.75vw;align-items:center;padding:.9vw;border-radius:16px;border:1px solid ${i<=active-1?'rgba(57,215,255,.55)':'rgba(255,255,255,.10)'};background:${i<=active-1?'rgba(57,215,255,.10)':'rgba(255,255,255,.035)'};transition:.35s"><div style="width:2.1vw;height:2.1vw;border-radius:50%;display:grid;place-items:center;background:${i<=active-1?'linear-gradient(135deg,var(--cyan),var(--purple))':'rgba(255,255,255,.08)'};font-weight:950">${f[0]}</div><div><div style="font-weight:900;font-size:.98vw">${f[1]}</div><div class="small">${f[2]}</div></div></div>`).join('')}
+function setStep(i){step=(i+scenarios.length)%scenarios.length;let s=scenarios[step];document.querySelectorAll('.btn[data-step]').forEach(b=>b.classList.toggle('active',+b.dataset.step===step));document.getElementById('statePill').textContent=s.name;document.getElementById('obiVal').textContent=(s.obi>0?'+':'')+s.obi.toFixed(2);document.getElementById('obiVal').style.color=s.obi<0?'var(--red)':'var(--green)';document.getElementById('spreadVal').textContent=s.spread.toFixed(2)+'%';document.getElementById('spreadGauge').style.width=Math.min(100,s.spread*240)+'%';document.getElementById('obiGauge').style.width=Math.max(4,Math.min(96,(s.obi+1)/2*100))+'%';document.getElementById('pathLine').setAttribute('points',s.path);document.getElementById('pulseDot').setAttribute('cx',s.dot[0]);document.getElementById('pulseDot').setAttribute('cy',s.dot[1]);var ce=document.getElementById('cue'); if(ce){ce.innerHTML=''; ce.style.display='none';}renderBook(s);renderFlow(s.node);}
+document.querySelectorAll('.btn[data-step]').forEach(b=>b.onclick=()=>setStep(+b.dataset.step));document.getElementById('reset').onclick=()=>{clearInterval(timer);timer=null;setStep(0)};document.getElementById('auto').onclick=()=>{clearInterval(timer);timer=setInterval(()=>setStep(step+1),2200)};document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='4')setStep(+e.key-1);if(e.code==='Space'){e.preventDefault();setStep(step+1)}if(e.key.toLowerCase()==='a')document.getElementById('auto').click();if(e.key.toLowerCase()==='r')document.getElementById('reset').click()});setStep(0);
+</script></body></html></template>
+<template id="tpl-workflow"><!DOCTYPE html><html><head><title>Interactive SAS Backtest Engine</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+:root{
+  --bg0:#060b18; --bg1:#0a1330; --panel:rgba(12,22,48,.72); --panel2:rgba(15,28,62,.54);
+  --line:rgba(132,180,255,.22); --muted:#8ea2c6; --text:#edf5ff; --cyan:#39d7ff;
+  --blue:#4c85ff; --purple:#a070ff; --green:#27f3a0; --red:#ff5f7f; --orange:#ffb547;
+  --shadow: 0 18px 60px rgba(0,0,0,.40); --radius:24px;
+}
+*{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050916;color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+body{background:radial-gradient(circle at 18% 8%, rgba(57,215,255,.22), transparent 28%),radial-gradient(circle at 83% 18%, rgba(160,112,255,.20), transparent 30%),linear-gradient(140deg,var(--bg0),var(--bg1) 55%,#030611);}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.17;background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px, transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at 50% 50%, black, transparent 84%)}
+.slide{position:relative;width:100vw;height:100vh;padding:3.8vh 3.6vw;display:flex;flex-direction:column;gap:1.8vh;}
+.kicker{font-size:1.0vw;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:800;opacity:.95}.title{font-size:3.05vw;line-height:1.02;font-weight:900;letter-spacing:-.05em;margin:.3vh 0}.subtitle{font-size:1.15vw;color:var(--muted);line-height:1.45;max-width:75vw}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1.6vw;min-height:0;flex:1}.panel{background:linear-gradient(180deg,rgba(20,37,76,.76),rgba(8,16,36,.64));border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius);position:relative;overflow:hidden}.panel:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.09),transparent 30%);pointer-events:none}.panel-inner{position:relative;z-index:1;height:100%;padding:1.2vw}.panel-title{font-size:1.1vw;font-weight:850;color:#d9e8ff;margin-bottom:1vh;display:flex;align-items:center;gap:.6vw}.pill{display:inline-flex;align-items:center;gap:.35vw;padding:.38vw .7vw;border:1px solid rgba(99,214,255,.26);background:rgba(57,215,255,.10);border-radius:999px;color:#bff4ff;font-size:.75vw;font-weight:800;letter-spacing:.03em}.controls{display:flex;align-items:center;gap:.65vw;flex-wrap:wrap}.btn{appearance:none;border:1px solid rgba(120,170,255,.32);background:rgba(13,26,59,.78);color:#dfeeff;border-radius:14px;padding:.72vw .95vw;font-size:.86vw;font-weight:800;letter-spacing:.01em;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.18);transition:transform .16s,background .16s,border .16s,box-shadow .16s}.btn:hover{transform:translateY(-2px);background:rgba(34,59,116,.86);box-shadow:0 12px 28px rgba(57,215,255,.12)}.btn.active,.btn.primary{background:linear-gradient(135deg,rgba(57,215,255,.25),rgba(160,112,255,.26));border-color:rgba(57,215,255,.65);box-shadow:0 0 0 1px rgba(57,215,255,.12),0 12px 35px rgba(57,215,255,.18)}.btn.warn{border-color:rgba(255,95,127,.40);background:rgba(255,95,127,.10)}.hint{position:absolute;right:3.6vw;bottom:2.4vh;color:var(--muted);font-size:.82vw}.kbd{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);border-radius:7px;padding:.12vw .35vw;color:#dce9ff;font-weight:900}.cue,.kicker{display:none!important}.metric{display:flex;flex-direction:column;gap:.3vh}.metric .value{font-size:2vw;font-weight:950;letter-spacing:-.04em}.metric .label{font-size:.78vw;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:800}.glow{filter:drop-shadow(0 0 18px rgba(57,215,255,.36))}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1vw}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1vw}.small{font-size:.82vw;color:var(--muted);line-height:1.45}.tag{padding:.22vw .5vw;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:.72vw;font-weight:800;color:#d4e6ff}.footerbar{display:flex;align-items:center;justify-content:space-between;margin-top:.2vh}.progress{height:.45vh;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;flex:1}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .5s cubic-bezier(.2,.7,.2,1)}
+@media(max-aspect-ratio: 14/10){.title{font-size:3.6vw}.subtitle{font-size:1.5vw}.row{grid-template-columns:1fr}.panel-title{font-size:1.5vw}.btn{font-size:1.1vw}.hint{font-size:1.05vw}}
+</style>
+</head><body>
+<div class="noise"></div><div class="slide">
+ <div><div class="kicker"></div><div class="title">SAS Backtest Engine</div><div class="subtitle">Presenter-controlled workflow: from raw Level-2 data to OOS signals, execution-aware returns, and statistical evaluation.</div></div>
+ <div class="row" style="grid-template-columns:1.12fr .88fr;">
+  <div class="panel"><div class="panel-inner">
+   <div class="panel-title">Pipeline controller <span class="pill" id="stepPill">Step 1 / 7</span></div>
+   <div id="pipeline" style="display:grid;grid-template-columns:repeat(7,1fr);gap:.55vw;margin:1.1vh 0 1.6vh"></div>
+   <div style="display:grid;grid-template-columns:.93fr 1.07fr;gap:1vw;height:71%;">
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:1vw"><div id="stepDetail"></div></div></div>
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:0;overflow:hidden"><pre id="codeBox" style="margin:0;height:100%;padding:1vw;overflow:hidden;background:rgba(0,0,0,.25);font-size:.78vw;line-height:1.52;color:#d9e9ff"></pre></div></div>
+   </div>
+  </div></div>
+  <div class="panel"><div class="panel-inner" style="display:flex;flex-direction:column;gap:1vh;">
+   <div class="panel-title">Backtesting reliability checklist</div>
+   <div id="checks" style="display:grid;gap:.8vh"></div>
+   <div class="cue" id="cue">Use the buttons while speaking: every step adds one layer of credibility to the backtest.</div>
+   <div style="margin-top:auto" class="grid3">
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:.9vw"><div class="metric"><div class="value" style="font-size:1.55vw">70/30</div><div class="label">IS / OOS split</div></div></div></div>
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:.9vw"><div class="metric"><div class="value" style="font-size:1.55vw">5–60s</div><div class="label">horizons</div></div></div></div>
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:.9vw"><div class="metric"><div class="value" style="font-size:1.55vw">Ask→Bid</div><div class="label">execution</div></div></div></div>
+   </div>
+  </div></div>
+ </div>
+ <div class="footerbar"><div class="controls"><button class="btn" id="prev">← Prev</button><button class="btn primary" id="next">Next →</button><button class="btn" id="auto">Auto</button><button class="btn warn" id="reset">Reset</button></div><div class="hint"><span class="kbd">1–7</span> jump · <span class="kbd">Space</span> next · <span class="kbd">A</span> auto</div></div>
+</div>
+<script>
+const steps=[
+ {t:'Raw Data',d:'Import three selected A-share stocks with Level-2 five-level bid and ask queues.',code:`data WORK.RAW_DATA_ALL;\n  infile "SELECTED_STOCKS_000001_600519_002611.csv"\n         dlm=',' dsd missover firstobs=2;\n  input time open current high low ... a1_v a1_p b1_v b1_p ...;\nrun;`,checks:['Data imported','Stock filter applied'],cue:'Technical speaker can start here: the code reads raw Level-2 snapshots, not daily bars.'},
+ {t:'Clean & Sort',d:'Parse timestamps, remove invalid quotes, filter non-continuous trading sessions, then sort by stock and time.',code:`time_dt = input(raw_time,e8601dt19.);\nif missing(time_dt) then delete;\nif '09:15:00't <= t <= '09:30:00't then delete;\nproc sort data=WORK.RAW_DATA_ALL; by stock_code time_dt; run;`,checks:['Timestamp parsed','Session filters applied','Invalid records removed','Sorted by stock-time'],cue:'Explain why cleaning matters: high-frequency data is noisy and must be ordered before constructing queue changes.'},
+ {t:'Variables',d:'Construct mid-price, relative spread, five-level depth, OBI, OFI proxy, and micro-price.',code:`mid_price = (a1_p+b1_p)/2;\nrelative_spread = (a1_p-b1_p)/mid_price;\nbid_depth5 = sum(b1_v,b2_v,b3_v,b4_v,b5_v);\nask_depth5 = sum(a1_v,a2_v,a3_v,a4_v,a5_v);\nobi_5 = (bid_depth5-ask_depth5)/(bid_depth5+ask_depth5);`,checks:['Microstructure features','Simplified OFI proxy','Five-level OBI'],cue:'This is the project\'s microstructure layer. Emphasize simplified OFI proxy, not full classical OFI.'},
+ {t:'IS/OOS Split',d:'Use only in-sample data for thresholds and reserve out-of-sample period for evaluation.',code:`if row_num <= 0.7 * max_row then sample="IN";\nelse sample="OOS";\n\nproc means data=BASE_DATA(where=(sample="IN"));\n  var obi_5 relative_spread;\n  output out=thresholds p10(obi_5)=obi_p10 p90(relative_spread)=spread_p90;\nrun;`,checks:['70% in-sample','30% OOS','Thresholds estimated only before testing'],cue:'This is the anti-overfitting slide. Signal thresholds are learned before the OOS evaluation period.'},
+ {t:'Signal',d:'Trigger the main signal when negative OBI and wide relative spread occur together, with noise-control rules applied before evaluation.',code:`if sample="OOS" and\n   obi_5 < obi_5_p10 and\n   relative_spread > spread_p90\nthen signal_main = 1;\nelse signal_main = 0;`,checks:['OOS signal only','10/90 thresholds','Cooldown / abnormal-return controls','Liquidity-stress event'],cue:'The signal combines two conditions: visible sell-side pressure and deteriorating liquidity.'},
+ {t:'Future Returns',d:'Match each signal with the first available quote after 5, 10, 30, and 60 seconds.',code:`/* time-driven future return matching */\nwhere b.time_dt >= intnx('second', a.time_dt, &sec);\nfuture_time = min(b.time_dt);\nret_mid  = future_mid / entry_mid - 1;\nret_exec = future_bid / entry_ask - 1;`,checks:['5/10/30/60s horizons','No future used in signal','Future used only for evaluation'],cue:'This distinguishes signal construction from return evaluation, preventing future leakage.'},
+ {t:'Evaluation',d:'Output signal frequency, performance summaries, t-tests, alpha decay, and cost sensitivity.',code:`proc means data=trading_results;\n  class stock_code holding_sec;\n  var ret_exec;\nrun;\n\nproc ttest data=ret10 h0=0;\n  by stock_code; var ret_exec;\nrun;`,checks:['Performance table','T-test','Alpha decay','Cost sensitivity'],cue:'Close the technical section by saying the outputs support hypothesis testing, not just a profit table.'}
+];
+let idx=0,timer=null;
+const pipeline=document.getElementById('pipeline'), checks=document.getElementById('checks');
+function render(){pipeline.innerHTML=steps.map((s,i)=>`<button class="btn ${i===idx?'active':''}" data-i="${i}" style="padding:.7vw .4vw;font-size:.72vw;min-height:5.6vh">${i+1}<br>${s.t}</button>`).join('');document.querySelectorAll('#pipeline .btn').forEach(b=>b.onclick=()=>{idx=+b.dataset.i;render()});let s=steps[idx];document.getElementById('stepPill').textContent=`Step ${idx+1} / ${steps.length}`;document.getElementById('stepDetail').innerHTML=`<div class="metric"><div class="label">Current step</div><div class="value" style="font-size:1.95vw;color:var(--cyan)">${s.t}</div></div><p style="font-size:1vw;line-height:1.48;color:#dceaff">${s.d}</p><div style="margin-top:1.5vh" class="progress"><span style="width:${(idx+1)/steps.length*100}%"></span></div>`;document.getElementById('codeBox').textContent=s.code;checks.innerHTML=steps.map((st,i)=>`<div style="padding:.85vw;border-radius:15px;border:1px solid ${i<=idx?'rgba(39,243,160,.45)':'rgba(255,255,255,.10)'};background:${i<=idx?'rgba(39,243,160,.08)':'rgba(255,255,255,.035)'};display:flex;gap:.7vw;align-items:flex-start"><div style="width:1.25vw;height:1.25vw;border-radius:50%;display:grid;place-items:center;background:${i<=idx?'var(--green)':'rgba(255,255,255,.12)'};color:#061022;font-weight:950;font-size:.72vw">✓</div><div><div style="font-weight:900;font-size:.9vw">${st.t}</div><div class="small">${i===idx?s.checks.join(' · '):st.d}</div></div></div>`).join('');var ce=document.getElementById('cue'); if(ce){ce.innerHTML=''; ce.style.display='none';}}
+document.getElementById('next').onclick=()=>{idx=(idx+1)%steps.length;render()};document.getElementById('prev').onclick=()=>{idx=(idx-1+steps.length)%steps.length;render()};document.getElementById('reset').onclick=()=>{clearInterval(timer);timer=null;idx=0;render()};document.getElementById('auto').onclick=()=>{clearInterval(timer);timer=setInterval(()=>{idx=(idx+1)%steps.length;render()},2500)};document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='7'){idx=+e.key-1;render()} if(e.code==='Space'){e.preventDefault();document.getElementById('next').click()} if(e.key.toLowerCase()==='a')document.getElementById('auto').click(); if(e.key.toLowerCase()==='r')document.getElementById('reset').click()});render();
+</script></body></html></template>
+<template id="tpl-execution"><!DOCTYPE html><html><head><title>Interactive Execution-Aware Return Explorer</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+:root{
+  --bg0:#060b18; --bg1:#0a1330; --panel:rgba(12,22,48,.72); --panel2:rgba(15,28,62,.54);
+  --line:rgba(132,180,255,.22); --muted:#8ea2c6; --text:#edf5ff; --cyan:#39d7ff;
+  --blue:#4c85ff; --purple:#a070ff; --green:#27f3a0; --red:#ff5f7f; --orange:#ffb547;
+  --shadow: 0 18px 60px rgba(0,0,0,.40); --radius:24px;
+}
+*{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050916;color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+body{background:radial-gradient(circle at 18% 8%, rgba(57,215,255,.22), transparent 28%),radial-gradient(circle at 83% 18%, rgba(160,112,255,.20), transparent 30%),linear-gradient(140deg,var(--bg0),var(--bg1) 55%,#030611);}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.17;background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px, transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at 50% 50%, black, transparent 84%)}
+.slide{position:relative;width:100vw;height:100vh;padding:3.8vh 3.6vw;display:flex;flex-direction:column;gap:1.8vh;}
+.kicker{font-size:1.0vw;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:800;opacity:.95}.title{font-size:3.05vw;line-height:1.02;font-weight:900;letter-spacing:-.05em;margin:.3vh 0}.subtitle{font-size:1.15vw;color:var(--muted);line-height:1.45;max-width:75vw}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1.6vw;min-height:0;flex:1}.panel{background:linear-gradient(180deg,rgba(20,37,76,.76),rgba(8,16,36,.64));border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius);position:relative;overflow:hidden}.panel:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.09),transparent 30%);pointer-events:none}.panel-inner{position:relative;z-index:1;height:100%;padding:1.2vw}.panel-title{font-size:1.1vw;font-weight:850;color:#d9e8ff;margin-bottom:1vh;display:flex;align-items:center;gap:.6vw}.pill{display:inline-flex;align-items:center;gap:.35vw;padding:.38vw .7vw;border:1px solid rgba(99,214,255,.26);background:rgba(57,215,255,.10);border-radius:999px;color:#bff4ff;font-size:.75vw;font-weight:800;letter-spacing:.03em}.controls{display:flex;align-items:center;gap:.65vw;flex-wrap:wrap}.btn{appearance:none;border:1px solid rgba(120,170,255,.32);background:rgba(13,26,59,.78);color:#dfeeff;border-radius:14px;padding:.72vw .95vw;font-size:.86vw;font-weight:800;letter-spacing:.01em;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.18);transition:transform .16s,background .16s,border .16s,box-shadow .16s}.btn:hover{transform:translateY(-2px);background:rgba(34,59,116,.86);box-shadow:0 12px 28px rgba(57,215,255,.12)}.btn.active,.btn.primary{background:linear-gradient(135deg,rgba(57,215,255,.25),rgba(160,112,255,.26));border-color:rgba(57,215,255,.65);box-shadow:0 0 0 1px rgba(57,215,255,.12),0 12px 35px rgba(57,215,255,.18)}.btn.warn{border-color:rgba(255,95,127,.40);background:rgba(255,95,127,.10)}.hint{position:absolute;right:3.6vw;bottom:2.4vh;color:var(--muted);font-size:.82vw}.kbd{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);border-radius:7px;padding:.12vw .35vw;color:#dce9ff;font-weight:900}.cue,.kicker{display:none!important}.metric{display:flex;flex-direction:column;gap:.3vh}.metric .value{font-size:2vw;font-weight:950;letter-spacing:-.04em}.metric .label{font-size:.78vw;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:800}.glow{filter:drop-shadow(0 0 18px rgba(57,215,255,.36))}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1vw}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1vw}.small{font-size:.82vw;color:var(--muted);line-height:1.45}.tag{padding:.22vw .5vw;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:.72vw;font-weight:800;color:#d4e6ff}.footerbar{display:flex;align-items:center;justify-content:space-between;margin-top:.2vh}.progress{height:.45vh;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;flex:1}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .5s cubic-bezier(.2,.7,.2,1)}
+@media(max-aspect-ratio: 14/10){.title{font-size:3.6vw}.subtitle{font-size:1.5vw}.row{grid-template-columns:1fr}.panel-title{font-size:1.5vw}.btn{font-size:1.1vw}.hint{font-size:1.05vw}}
+</style>
+</head><body>
+<div class="noise"></div><div class="slide">
+ <div><div class="kicker"></div><div class="title">Execution-Aware Return Explorer</div><div class="subtitle">Use mode, horizon, and cost buttons to show why high-frequency quote-level signals can disappear once entry at ask and exit at future bid are considered.</div></div>
+ <div class="row" style="grid-template-columns:1.08fr .92fr;">
+  <div class="panel"><div class="panel-inner">
+   <div class="panel-title">Trade execution path <span class="pill" id="modePill">Execution-aware</span></div>
+   <svg id="execSvg" viewBox="0 0 920 475" style="width:100%;height:80%;overflow:visible">
+    <defs><linearGradient id="askG" x1="0" x2="1"><stop offset="0" stop-color="#ff5f7f"/><stop offset="1" stop-color="#ffb547"/></linearGradient><linearGradient id="bidG" x1="0" x2="1"><stop offset="0" stop-color="#27f3a0"/><stop offset="1" stop-color="#39d7ff"/></linearGradient></defs>
+    <rect x="0" y="0" width="920" height="475" rx="24" fill="rgba(255,255,255,.035)" stroke="rgba(255,255,255,.11)"/>
+    <text x="44" y="46" fill="#8ea2c6" font-size="18" font-weight="800">Signal time</text><text x="660" y="46" fill="#8ea2c6" font-size="18" font-weight="800" id="futureLabel">Future quote: +10s</text>
+    <line x1="110" y1="70" x2="110" y2="410" stroke="rgba(255,255,255,.16)" stroke-dasharray="8 10"/><line x1="710" y1="70" x2="710" y2="410" stroke="rgba(255,255,255,.16)" stroke-dasharray="8 10"/>
+    <g id="entryGroup"><rect id="entryAsk" x="42" y="110" width="138" height="42" rx="12" fill="url(#askG)"/><text x="58" y="137" fill="#07101f" font-size="17" font-weight="950">entry ASK 100.05</text><rect id="entryMid" x="42" y="210" width="138" height="42" rx="12" fill="rgba(255,255,255,.18)"/><text x="58" y="237" fill="#dce9ff" font-size="17" font-weight="950">mid 100.00</text><rect id="entryBid" x="42" y="310" width="138" height="42" rx="12" fill="url(#bidG)"/><text x="58" y="337" fill="#07101f" font-size="17" font-weight="950">bid 99.95</text></g>
+    <g id="futureGroup"><rect id="futureAsk" x="642" y="120" width="138" height="42" rx="12" fill="url(#askG)"/><text id="faTxt" x="658" y="147" fill="#07101f" font-size="17" font-weight="950">ask 100.00</text><rect id="futureMid" x="642" y="220" width="138" height="42" rx="12" fill="rgba(255,255,255,.18)"/><text id="fmTxt" x="658" y="247" fill="#dce9ff" font-size="17" font-weight="950">mid 99.95</text><rect id="futureBid" x="642" y="320" width="138" height="42" rx="12" fill="url(#bidG)"/><text id="fbTxt" x="658" y="347" fill="#07101f" font-size="17" font-weight="950">bid 99.90</text></g>
+    <path id="tradeArrow" d="M 182 131 C 330 75, 510 78, 640 341" fill="none" stroke="#39d7ff" stroke-width="6" stroke-linecap="round" stroke-dasharray="18 12"/><circle id="movingDot" cx="182" cy="131" r="10" fill="#39d7ff" class="glow"><animateMotion dur="2.4s" repeatCount="indefinite" path="M 0 0 C 148 -56, 328 -53, 458 210"/></circle>
+    <text id="formula" x="300" y="432" fill="#edf5ff" font-size="26" font-weight="950">ret_exec = future_bid / entry_ask − 1</text>
+   </svg>
+   <div class="controls"><button class="btn active" data-mode="exec">Execution-aware</button><button class="btn" data-mode="mid">Mid-price reference</button><button class="btn" id="animate">Replay path</button></div>
+  </div></div>
+  <div class="panel"><div class="panel-inner" style="display:flex;flex-direction:column;gap:1.1vh;">
+   <div class="panel-title">Interactive return calculator</div>
+   <div class="grid4" id="horizonBtns"></div>
+   <div class="grid4" id="costBtns"></div>
+   <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner"><div class="metric"><div class="label">Displayed return</div><div class="value" id="retVal" style="color:var(--red)">-0.1008%</div></div><div class="small" id="retNote">Execution-aware aggregate return at 10s before extra explicit cost.</div></div></div>
+   <div class="cue" id="cue"></div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1vw;margin-top:auto">
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner"><div class="metric"><div class="label">Entry assumption</div><div class="value" style="font-size:1.35vw;color:var(--orange)">Buy at ask</div></div></div></div>
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner"><div class="metric"><div class="label">Exit assumption</div><div class="value" style="font-size:1.35vw;color:var(--green)">Sell at bid</div></div></div></div>
+   </div>
+  </div></div>
+ </div>
+ <div class="footerbar"><div class="controls"><button class="btn primary" id="nextH">Next horizon</button><button class="btn warn" id="reset">Reset</button></div><div class="hint"><span class="kbd">M</span> mode · <span class="kbd">1–4</span> horizon · <span class="kbd">C</span> cost · <span class="kbd">Space</span> next</div></div>
+</div>
+<script>
+const horizons=[{h:5,r:-0.100093,mid:-0.0004,bid:99.8999},{h:10,r:-0.100779,mid:0.0060,bid:99.8992},{h:30,r:-0.087700,mid:0.0169,bid:99.9123},{h:60,r:-0.084370,mid:0.0319,bid:99.9156}];
+const costs=[{n:'0 bps',v:0},{n:'5 bps',v:.05},{n:'10 bps',v:.10},{n:'20 bps',v:.20}];let hi=1,ci=0,mode='exec';
+function renderBtns(){document.getElementById('horizonBtns').innerHTML=horizons.map((x,i)=>`<button class="btn ${i===hi?'active':''}" data-h="${i}">${x.h}s</button>`).join('');document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{hi=+b.dataset.h;render()});document.getElementById('costBtns').innerHTML=costs.map((x,i)=>`<button class="btn ${i===ci?'active':''}" data-c="${i}">${x.n}</button>`).join('');document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ci=+b.dataset.c;render()});}
+function render(){renderBtns();let x=horizons[hi],c=costs[ci];document.getElementById('futureLabel').textContent='Future quote: +'+x.h+'s';let shown=mode==='exec'?x.r-c.v:x.mid-c.v;document.getElementById('retVal').textContent=(shown>=0?'+':'')+shown.toFixed(4)+'%';document.getElementById('retVal').style.color=shown>=0?'var(--green)':'var(--red)';document.getElementById('retNote').textContent=mode==='exec'?`Execution-aware aggregate return at ${x.h}s ${c.v?`after ${c.n} extra cost`:'before extra explicit cost'}.`:`Mid-price reference at ${x.h}s ${c.v?`after ${c.n} extra cost`:'before extra explicit cost'}.`;document.getElementById('modePill').textContent=mode==='exec'?'Execution-aware':'Mid-price reference';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));document.getElementById('fbTxt').textContent='bid '+x.bid.toFixed(2);document.getElementById('fmTxt').textContent='mid '+(100+x.mid/100*100).toFixed(2);document.getElementById('faTxt').textContent='ask '+(x.bid+0.10).toFixed(2);if(mode==='exec'){document.getElementById('tradeArrow').setAttribute('d','M 182 131 C 330 75, 510 78, 640 341');document.getElementById('formula').textContent='ret_exec = future_bid / entry_ask − 1';}else{document.getElementById('tradeArrow').setAttribute('d','M 182 231 C 330 175, 510 178, 640 241');document.getElementById('formula').textContent='ret_mid = future_mid / entry_mid − 1';}}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});document.getElementById('nextH').onclick=()=>{hi=(hi+1)%horizons.length;render()};document.getElementById('reset').onclick=()=>{hi=1;ci=0;mode='exec';render()};document.getElementById('animate').onclick=()=>{const dot=document.getElementById('movingDot');dot.style.display='none';setTimeout(()=>dot.style.display='block',40)};document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='4'){hi=+e.key-1;render()} if(e.key.toLowerCase()==='m'){mode=mode==='exec'?'mid':'exec';render()} if(e.key.toLowerCase()==='c'){ci=(ci+1)%costs.length;render()} if(e.code==='Space'){e.preventDefault();document.getElementById('nextH').click()}});render();
+</script></body></html></template>
+<template id="tpl-results"><!DOCTYPE html><html><head><title>Interactive Results Control Room</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+:root{
+  --bg0:#060b18; --bg1:#0a1330; --panel:rgba(12,22,48,.72); --panel2:rgba(15,28,62,.54);
+  --line:rgba(132,180,255,.22); --muted:#8ea2c6; --text:#edf5ff; --cyan:#39d7ff;
+  --blue:#4c85ff; --purple:#a070ff; --green:#27f3a0; --red:#ff5f7f; --orange:#ffb547;
+  --shadow: 0 18px 60px rgba(0,0,0,.40); --radius:24px;
+}
+*{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050916;color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+body{background:radial-gradient(circle at 18% 8%, rgba(57,215,255,.22), transparent 28%),radial-gradient(circle at 83% 18%, rgba(160,112,255,.20), transparent 30%),linear-gradient(140deg,var(--bg0),var(--bg1) 55%,#030611);}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.17;background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px, transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at 50% 50%, black, transparent 84%)}
+.slide{position:relative;width:100vw;height:100vh;padding:3.8vh 3.6vw;display:flex;flex-direction:column;gap:1.8vh;}
+.kicker{font-size:1.0vw;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:800;opacity:.95}.title{font-size:3.05vw;line-height:1.02;font-weight:900;letter-spacing:-.05em;margin:.3vh 0}.subtitle{font-size:1.15vw;color:var(--muted);line-height:1.45;max-width:75vw}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1.6vw;min-height:0;flex:1}.panel{background:linear-gradient(180deg,rgba(20,37,76,.76),rgba(8,16,36,.64));border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius);position:relative;overflow:hidden}.panel:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.09),transparent 30%);pointer-events:none}.panel-inner{position:relative;z-index:1;height:100%;padding:1.2vw}.panel-title{font-size:1.1vw;font-weight:850;color:#d9e8ff;margin-bottom:1vh;display:flex;align-items:center;gap:.6vw}.pill{display:inline-flex;align-items:center;gap:.35vw;padding:.38vw .7vw;border:1px solid rgba(99,214,255,.26);background:rgba(57,215,255,.10);border-radius:999px;color:#bff4ff;font-size:.75vw;font-weight:800;letter-spacing:.03em}.controls{display:flex;align-items:center;gap:.65vw;flex-wrap:wrap}.btn{appearance:none;border:1px solid rgba(120,170,255,.32);background:rgba(13,26,59,.78);color:#dfeeff;border-radius:14px;padding:.72vw .95vw;font-size:.86vw;font-weight:800;letter-spacing:.01em;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.18);transition:transform .16s,background .16s,border .16s,box-shadow .16s}.btn:hover{transform:translateY(-2px);background:rgba(34,59,116,.86);box-shadow:0 12px 28px rgba(57,215,255,.12)}.btn.active,.btn.primary{background:linear-gradient(135deg,rgba(57,215,255,.25),rgba(160,112,255,.26));border-color:rgba(57,215,255,.65);box-shadow:0 0 0 1px rgba(57,215,255,.12),0 12px 35px rgba(57,215,255,.18)}.btn.warn{border-color:rgba(255,95,127,.40);background:rgba(255,95,127,.10)}.hint{position:absolute;right:3.6vw;bottom:2.4vh;color:var(--muted);font-size:.82vw}.kbd{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);border-radius:7px;padding:.12vw .35vw;color:#dce9ff;font-weight:900}.cue,.kicker{display:none!important}.metric{display:flex;flex-direction:column;gap:.3vh}.metric .value{font-size:2vw;font-weight:950;letter-spacing:-.04em}.metric .label{font-size:.78vw;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:800}.glow{filter:drop-shadow(0 0 18px rgba(57,215,255,.36))}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1vw}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1vw}.small{font-size:.82vw;color:var(--muted);line-height:1.45}.tag{padding:.22vw .5vw;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:.72vw;font-weight:800;color:#d4e6ff}.footerbar{display:flex;align-items:center;justify-content:space-between;margin-top:.2vh}.progress{height:.45vh;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;flex:1}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .5s cubic-bezier(.2,.7,.2,1)}
+@media(max-aspect-ratio: 14/10){.title{font-size:3.6vw}.subtitle{font-size:1.5vw}.row{grid-template-columns:1fr}.panel-title{font-size:1.5vw}.btn{font-size:1.1vw}.hint{font-size:1.05vw}}
+</style>
+</head><body>
+<div class="noise"></div><div class="slide">
+ <div><div class="kicker"></div><div class="title">Results Control Room</div><div class="subtitle">One slide to guide the conclusion: the signal is informative, but the direction is continuation rather than reversal.</div></div>
+ <div class="row" style="grid-template-columns:1fr .82fr;">
+  <div class="panel"><div class="panel-inner">
+   <div class="panel-title">Evidence panel <span class="pill" id="tabPill">Signal frequency</span></div>
+   <div id="viz" style="height:82%;"></div>
+  </div></div>
+  <div class="panel"><div class="panel-inner" style="display:flex;flex-direction:column;gap:1.1vh">
+    <div class="panel-title">Presenter controls</div>
+    <div class="controls" id="tabs"></div>
+    <div class="cue" id="cue"></div>
+    <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner"><div class="metric"><div class="label">Core finding</div><div class="value" style="font-size:1.8vw;color:var(--red)">Continuation &gt; Reversal</div></div><div class="small">The reversal hypothesis is rejected by OOS execution-aware evidence.</div></div></div>
+    <div style="margin-top:auto" class="grid3">
+      <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:.9vw"><div class="metric"><div class="value" style="font-size:1.4vw">1,299</div><div class="label">OOS signals</div></div></div></div>
+      <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:.9vw"><div class="metric"><div class="value" style="font-size:1.4vw;color:var(--red)">3/3</div><div class="label">negative t-tests</div></div></div></div>
+      <div class="panel" style="box-shadow:none;border-radius:18px"><div class="panel-inner" style="padding:.9vw"><div class="metric"><div class="value" style="font-size:1.4vw;color:var(--red)">4/4</div><div class="label">negative horizons</div></div></div></div>
+    </div>
+  </div></div>
+ </div>
+ <div class="footerbar"><div class="controls"><button class="btn" id="prev">← Prev</button><button class="btn primary" id="next">Next →</button><button class="btn" id="auto">Auto</button><button class="btn warn" id="reset">Reset</button></div><div class="hint"><span class="kbd">1–5</span> tabs · <span class="kbd">Space</span> next · <span class="kbd">A</span> auto</div></div>
+</div>
+<script>
+const data={signals:[{s:'000001',obs:31110,n:9,r:.03},{s:'002611',obs:30838,n:799,r:2.59},{s:'600519',obs:26462,n:491,r:1.86}],returns:{'000001':[-.140993,-.141383,-.132223,-.200809],'002611':[-.121843,-.128502,-.114929,-.119252],'600519':[-.063994,-.054977,-.042629,-.025756]},ttest:[{s:'000001',n:9,mean:-.141,t:-4.98,p:'0.0011'},{s:'600519',n:491,mean:-.055,t:-12.44,p:'<0.0001'},{s:'002611',n:798,mean:-.129,t:-17.33,p:'<0.0001'}],decay:[{h:5,r:-.100093},{h:10,r:-.100779},{h:30,r:-.087700},{h:60,r:-.084370}]};
+const tabs=[{id:'signals',t:'Signals',cue:'The signal occurs in OOS data. Frequency differs strongly across stocks, which is itself a microstructure finding.'},{id:'returns',t:'Returns',cue:'If reversal worked, these bars should be positive. Instead, execution-aware returns are negative across most settings.'},{id:'ttest',t:'T-test',cue:'The 10-second t-tests are significantly negative. This rejects the reversal interpretation.'},{id:'decay',t:'Alpha decay',cue:'The average return remains negative across 5, 10, 30, and 60 seconds.'},{id:'takeaway',t:'Conclusion',cue:'Final message: the signal is informative, but the information is in the continuation direction.'}];let ti=0,timer=null;
+function bar(x,y,w,h,color,label,val){return `<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${color}" opacity=".86"><animate attributeName="width" from="0" to="${w}" dur=".65s" fill="freeze"/></rect><text x="${x-4}" y="${y+h*.65}" fill="#dce9ff" font-size="18" font-weight="900" text-anchor="end">${label}</text><text x="${x+w+12}" y="${y+h*.65}" fill="#edf5ff" font-size="18" font-weight="900">${val}</text></g>`}
+function renderTabs(){document.getElementById('tabs').innerHTML=tabs.map((tb,i)=>`<button class="btn ${i===ti?'active':''}" data-tab="${i}">${i+1} ${tb.t}</button>`).join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ti=+b.dataset.tab;render()});}
+function renderSignals(){let max=800;let rows=data.signals.map((d,i)=>bar(190,92+i*92,d.n/max*500,35,'url(#g1)',d.s,`${d.n} signals · ${d.r}%`)).join('');return `<svg viewBox="0 0 900 460" width="100%" height="100%"><defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#39d7ff"/><stop offset="1" stop-color="#a070ff"/></linearGradient></defs><text x="36" y="46" fill="#edf5ff" font-size="28" font-weight="950">Out-of-sample signal frequency</text><text x="36" y="74" fill="#8ea2c6" font-size="16">OOS observations: 000001 31,110 · 002611 30,838 · 600519 26,462</text>${rows}</svg>`}
+function renderReturns(){let stocks=Object.keys(data.returns), hs=[5,10,30,60];let groups='';stocks.forEach((s,si)=>{data.returns[s].forEach((r,hi)=>{let h=Math.abs(r)*1150;let x=105+hi*72+si*255;let y=285-h;groups+=`<rect x="${x}" y="${y}" width="42" height="${h}" rx="8" fill="${si===0?'#ff5f7f':si===1?'#ffb547':'#39d7ff'}" opacity=".85"><animate attributeName="height" from="0" to="${h}" dur=".55s" fill="freeze"/><animate attributeName="y" from="285" to="${y}" dur=".55s" fill="freeze"/></rect><text x="${x+21}" y="${y-8}" fill="#dce9ff" font-size="12" text-anchor="middle" font-weight="900">${r.toFixed(3)}%</text>`});groups+=`<text x="${158+si*255}" y="340" fill="#edf5ff" font-size="18" text-anchor="middle" font-weight="950">${s}</text>`});let labels=stocks.map((s,si)=>hs.map((h,hi)=>`<text x="${126+hi*72+si*255}" y="314" fill="#8ea2c6" font-size="12" text-anchor="middle">${h}s</text>`).join('')).join('');return `<svg viewBox="0 0 900 460" width="100%" height="100%"><text x="36" y="46" fill="#edf5ff" font-size="28" font-weight="950">Average execution-aware returns</text><text x="36" y="74" fill="#8ea2c6" font-size="16">All bars are below zero. Longer horizon does not produce a positive reversal.</text><line x1="70" y1="285" x2="845" y2="285" stroke="rgba(255,255,255,.22)"/><text x="55" y="290" fill="#8ea2c6" font-size="14" text-anchor="end">0</text>${groups}${labels}</svg>`}
+function renderTtest(){let cards=data.ttest.map((d,i)=>`<div style="padding:1.05vw;border-radius:20px;background:rgba(255,255,255,.045);border:1px solid rgba(255,95,127,.28)"><div style="font-size:1.1vw;font-weight:950;color:#edf5ff">${d.s}</div><div class="grid3" style="margin-top:1vh"><div><div class="label metric">N</div><b>${d.n}</b></div><div><div class="label metric">Mean</div><b style="color:var(--red)">${d.mean}%</b></div><div><div class="label metric">t-stat</div><b style="color:var(--red)">${d.t}</b></div></div><div class="small" style="margin-top:.9vh">p-value: <b>${d.p}</b></div></div>`).join('');return `<div style="height:100%;display:flex;flex-direction:column;gap:1.2vh"><div><div style="font-size:1.8vw;font-weight:950">10-second execution return t-tests</div><div class="small">All three tests are significantly negative, so the reversal hypothesis is not supported.</div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1vw;flex:1;align-content:center">${cards}</div></div>`}
+function renderDecay(){let max=.105;let pts=data.decay.map((d,i)=>[120+i*190,95+Math.abs(d.r)/max*240]);let path=pts.map((p,i)=>(i?'L':'M')+p[0]+','+p[1]).join(' ');let cs=pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="8" fill="#ff5f7f" class="glow"/><text x="${p[0]}" y="${p[1]-18}" fill="#edf5ff" font-size="15" text-anchor="middle" font-weight="900">${data.decay[i].r.toFixed(4)}%</text><text x="${p[0]}" y="380" fill="#8ea2c6" font-size="16" text-anchor="middle">${data.decay[i].h}s</text>`).join('');return `<svg viewBox="0 0 900 460" width="100%" height="100%"><text x="36" y="46" fill="#edf5ff" font-size="28" font-weight="950">Alpha decay across holding horizons</text><text x="36" y="74" fill="#8ea2c6" font-size="16">Average execution-aware return remains negative from 5s to 60s.</text><line x1="90" y1="95" x2="90" y2="355" stroke="rgba(255,255,255,.18)"/><line x1="90" y1="355" x2="810" y2="355" stroke="rgba(255,255,255,.18)"/><path d="${path}" fill="none" stroke="#ff5f7f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="stroke-dasharray" from="0 1000" to="1000 0" dur=".9s" fill="freeze"/></path>${cs}</svg>`}
+function renderTakeaway(){return `<div style="height:100%;display:grid;place-items:center;text-align:center"><div><div class="kicker">Final interpretation</div><div style="font-size:4vw;line-height:1.02;font-weight:950;letter-spacing:-.06em;margin:1vh 0"><span style="color:var(--red)">Reversal rejected.</span><br/><span style="color:var(--cyan)">Continuation supported.</span></div><div style="font-size:1.25vw;color:#dce9ff;max-width:760px;margin:auto;line-height:1.45">OBI + spread widening captures liquidity stress. In our A-share sample, that stress is followed by unresolved price pressure rather than immediate mean reversion.</div></div></div>`}
+function render(){renderTabs();let tb=tabs[ti];document.getElementById('tabPill').textContent=tb.t;var ce=document.getElementById('cue'); if(ce){ce.innerHTML=''; ce.style.display='none';}let viz=document.getElementById('viz');viz.innerHTML=tb.id==='signals'?renderSignals():tb.id==='returns'?renderReturns():tb.id==='ttest'?renderTtest():tb.id==='decay'?renderDecay():renderTakeaway();}
+document.getElementById('next').onclick=()=>{ti=(ti+1)%tabs.length;render()};document.getElementById('prev').onclick=()=>{ti=(ti-1+tabs.length)%tabs.length;render()};document.getElementById('reset').onclick=()=>{clearInterval(timer);timer=null;ti=0;render()};document.getElementById('auto').onclick=()=>{clearInterval(timer);timer=setInterval(()=>{ti=(ti+1)%tabs.length;render()},3000)};document.addEventListener('keydown',e=>{if(e.key>='1'&&e.key<='5'){ti=+e.key-1;render()}if(e.code==='Space'){e.preventDefault();document.getElementById('next').click()}if(e.key.toLowerCase()==='a')document.getElementById('auto').click();if(e.key.toLowerCase()==='r')document.getElementById('reset').click()});render();
+</script></body></html></template>
+
+<script>
+const deck=document.getElementById('deck');
+const slides=[...document.querySelectorAll('.slide')];
+const dots=document.getElementById('dots');
+const thumbs=document.getElementById('thumbGrid');
+const overviewGrid=document.getElementById('overviewGrid');
+const progressBar=document.getElementById('progressBar');
+let current=0;
+function titleOf(i){return slides[i].dataset.title||`Slide ${i+1}`;}
+function timeOf(i){return slides[i].dataset.time||'';}
+const SPEAKER_KEY='fin3083_assignable_speakers_v1';
+const TEAM_SPEAKERS=['Kivo','Ren','Steven'];
+let speakerAssignments={};
+try{speakerAssignments=JSON.parse(localStorage.getItem(SPEAKER_KEY)||'{}')||{};}catch(e){speakerAssignments={};}
+function speakerOf(i){return speakerAssignments[String(i)]||'';}
+function saveAssignments(){localStorage.setItem(SPEAKER_KEY,JSON.stringify(speakerAssignments));}
+function speakerOptions(selected){
+  return `<option value="">Unassigned</option>`+TEAM_SPEAKERS.map(n=>`<option value="${n}" ${selected===n?'selected':''}>${n}</option>`).join('');
+}
+function renderAssignmentSummary(){
+  const box=document.getElementById('assignmentSummary'); if(!box) return;
+  const counts=Object.fromEntries(TEAM_SPEAKERS.map(n=>[n,0])); let unassigned=0;
+  slides.forEach((_,i)=>{const sp=speakerOf(i); if(sp && counts[sp]!==undefined) counts[sp]++; else unassigned++;});
+  box.innerHTML=TEAM_SPEAKERS.map(n=>`<div class="member-summary ${counts[n]?'active':''}"><b>${n}</b><span>${counts[n]} slide${counts[n]===1?'':'s'} assigned</span></div>`).join('')+
+    `<div class="member-summary ${unassigned?'':'active'}"><b>Unassigned</b><span>${unassigned} slide${unassigned===1?'':'s'} pending</span></div>`;
+}
+function refreshOverviewAssignments(){
+  [...overviewGrid.children].forEach((card,i)=>{
+    const sp=speakerOf(i);
+    const chip=card.querySelector('[data-assignment-chip]');
+    const sel=card.querySelector('select');
+    if(chip){chip.textContent=sp||'Unassigned'; chip.classList.toggle('unassigned',!sp);}
+    if(sel && sel.value!==sp) sel.value=sp;
+    card.style.borderColor=i===current?'rgba(57,215,255,.65)':'rgba(255,255,255,.09)';
+  });
+  renderAssignmentSummary();
+}
+function setSpeakerAssignment(i,val){
+  if(val) speakerAssignments[String(i)]=val; else delete speakerAssignments[String(i)];
+  saveAssignments(); refreshOverviewAssignments(); updateUI();
+}
+function resetAssignments(){speakerAssignments={}; saveAssignments(); refreshOverviewAssignments(); updateUI();}
+async function copyAssignments(){
+  const lines=slides.map((s,i)=>`${String(i+1).padStart(2,'0')}. ${titleOf(i)} — ${speakerOf(i)||'Unassigned'} (${timeOf(i)})`);
+  const text='FIN3083 presentation speaker plan\n'+lines.join('\n');
+  const btn=document.getElementById('copyAssignmentsBtn');
+  try{await navigator.clipboard.writeText(text); if(btn){btn.textContent='Copied'; setTimeout(()=>btn.textContent='Copy plan',1200);}}
+  catch(e){prompt('Copy speaker plan:',text);}
+}
+function initNav(){
+  slides.forEach((s,i)=>{
+    const d=document.createElement('button'); d.className='dot'; d.title=`Slide ${i+1} · ${titleOf(i)}`; d.onclick=()=>go(i); dots.appendChild(d);
+    const t=document.createElement('button'); t.className='thumb'; t.innerHTML=`<b>${String(i+1).padStart(2,'0')}</b><br>${titleOf(i)}`; t.onclick=()=>go(i); thumbs.appendChild(t);
+    const o=document.createElement('div'); o.className='overview-slide'; o.tabIndex=0; o.setAttribute('role','button'); o.setAttribute('aria-label',`Jump to slide ${i+1}: ${titleOf(i)}`);
+    const sp=speakerOf(i);
+    o.innerHTML=`<div class="num">${String(i+1).padStart(2,'0')}</div><div class="name">${titleOf(i)}</div><div class="overview-meta"><span class="small">${timeOf(i)}</span><span class="assignment-pill ${sp?'':'unassigned'}" data-assignment-chip>${sp||'Unassigned'}</span></div><select class="speaker-select" aria-label="Assign speaker for slide ${i+1}" data-speaker-select="${i}">${speakerOptions(sp)}</select><button class="btn overview-jump">Open slide →</button>`;
+    o.onclick=()=>{go(i); closeOverview();};
+    o.onkeydown=(e)=>{if(e.key==='Enter'){go(i); closeOverview();}};
+    o.querySelector('select').onclick=e=>e.stopPropagation();
+    o.querySelector('select').onchange=e=>{e.stopPropagation(); setSpeakerAssignment(i,e.target.value);};
+    o.querySelector('.overview-jump').onclick=e=>{e.stopPropagation(); go(i); closeOverview();};
+    overviewGrid.appendChild(o);
+  });
+  renderAssignmentSummary();
+}
+function loadIframeForSlide(i){
+  slides[i].querySelectorAll('iframe[data-srcdoc]').forEach(frame=>{
+    if(frame.dataset.loaded) return;
+    const key=frame.dataset.srcdoc;
+    const tpl=document.getElementById('tpl-'+key);
+    if(tpl){ frame.srcdoc=tpl.innerHTML; frame.dataset.loaded='1'; }
+  });
+}
+function go(i){
+  if(i<0||i>=slides.length) return;
+  slides[current].classList.remove('active'); current=i; slides[current].classList.add('active');
+  updateUI(); loadIframeForSlide(current);
+}
+function updateUI(){
+  [...dots.children].forEach((d,i)=>d.classList.toggle('active',i===current));
+  [...thumbs.children].forEach((d,i)=>d.classList.toggle('active',i===current));
+  refreshOverviewAssignments();
+  progressBar.style.width=((current+1)/slides.length*100)+'%';
+  document.getElementById('slideCounter').textContent=`${current+1} / ${slides.length}`;
+  document.getElementById('cueSpeaker').textContent=speakerOf(current)||'Unassigned';
+  document.getElementById('cueTime').textContent=timeOf(current);
+  document.getElementById('cueTitle').textContent=titleOf(current);
+  document.getElementById('cueText').innerHTML=slides[current].dataset.cue||'';
+  document.getElementById('cueActions').innerHTML='<b>Interaction cue:</b> '+(slides[current].dataset.actions||'No interaction required.');
+}
+function nextSlide(){go(Math.min(current+1,slides.length-1));}
+function prevSlide(){go(Math.max(current-1,0));}
+function toggleMode(){deck.classList.toggle('formal'); deck.classList.toggle('practice'); const formal=deck.classList.contains('formal'); document.getElementById('modeBtn').textContent=formal?'Formal: cues OFF':'Practice: cues ON';}
+function openOverview(){document.getElementById('overview').classList.add('open');}
+function closeOverview(){document.getElementById('overview').classList.remove('open');}
+function fullScreen(){if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.();}
+// per-slide small interactions
+function setBtnGroup(btn){[...btn.parentElement.querySelectorAll('.btn')].forEach(b=>b.classList.remove('active')); btn.classList.add('active');}
+window.toggleHyp=function(n,btn){setBtnGroup(btn); ['hyp0','hyp1'].forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===n));}
+window.showData=function(n,btn){setBtnGroup(btn); const data=[['Ping An Bank','Large financial stock; signal is rare in OOS, useful as a contrast case.'],['Kweichow Moutai','High-price blue-chip stock; shows persistent negative execution-aware returns.'],['Dongfang Precision','More frequent signal occurrence; useful for statistical inference.']]; document.getElementById('dataDetail').innerHTML=`<b>${data[n][0]}</b><div class="small">${data[n][1]}</div>`;}
+window.showMethod=function(n,btn){setBtnGroup(btn); ['method0','method1','method2'].forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===n));}
+window.showEvidence=function(n,btn){setBtnGroup(btn); ['ev0','ev1','ev2'].forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===n));}
+
+const processSteps=[
+  {t:'Raw universe',d:'Start from a large A-share Level-2 high-frequency universe covering Shanghai and Shenzhen stocks. The raw files contain roughly 3-second order-book snapshots.',code:'Raw input: Level-2 snapshots\nFields: bid/ask price-volume queues, transaction fields, stock code, timestamp',flow:'Raw 7z Level-2 archives'},
+  {t:'Python extract',d:'Use Python to batch-decompress 7z files and process many CSV files in parallel before the data enters SAS. This improves efficiency and avoids manual file handling.',code:'Python preprocessing:\nfor archive in raw_7z_files:\n    extract archive\n    parse CSV chunks\n    keep target fields',flow:'Decompress + parallel CSV processing'},
+  {t:'Stock filter',d:'Filter the raw universe to the three target stocks: Ping An Bank (000001), Kweichow Moutai (600519), and Dongfang Precision (002611). The filtered files are merged into selected-stock CSV inputs for SAS.',code:'Selected stocks:\n000001  Ping An Bank\n600519  Kweichow Moutai\n002611  Dongfang Precision\n\nOutput: SELECTED_STOCKS_000001_600519_002611.csv',flow:'Three selected stock-level CSV panels'},
+  {t:'Session filter',d:'Remove non-continuous or special trading periods, including opening call auction, lunch break, and late closing stage. This reduces noise from periods where quotes do not represent normal continuous trading.',code:"Session filters:\n09:15–09:30  opening auction\n11:30–13:00  lunch break\n14:57 onward closing stage",flow:'Continuous-trading observations'},
+  {t:'Quote validation',d:'Drop abnormal records such as missing timestamps, zero prices or volumes, and crossed or invalid quotes where the best bid exceeds the best ask.',code:'Validation examples:\nif missing(time_dt) then delete;\nif a1_p <= 0 or b1_p <= 0 then delete;\nif b1_p > a1_p then delete;',flow:'Clean valid quote panel'},
+  {t:'Feature build',d:'Construct market microstructure variables from five-level order-book depth: OBI, OFI proxy, relative spread, mid-price, and micro-price.',code:'Constructed variables:\nmid_price = (ask1 + bid1) / 2\nrelative_spread = (ask1 - bid1) / mid_price\nOBI = (bid_depth5 - ask_depth5) / total_depth5\nOFI proxy = Δbid_queue - Δask_queue',flow:'Microstructure feature matrix'},
+  {t:'IS/OOS split',d:'Sort each stock by time and split observations into 70% in-sample and 30% out-of-sample. Thresholds are estimated only from in-sample data to prevent future leakage.',code:'By stock and time:\n70% in-sample  → estimate P10(OBI), P90(spread)\n30% OOS        → generate and evaluate signals',flow:'Leakage-controlled IS/OOS design'},
+  {t:'Noise control',d:'Apply abnormal-return filtering and cooldown logic to reduce high-frequency microstructure noise and repeated clustered signals before statistical evaluation.',code:'Noise controls:\n• abnormal-return filtering\n• cooldown between repeated signals\n• stock-level performance evaluation',flow:'Clean OOS signal sample'}
+];
+function renderProcess(i=0){
+  const btns=document.getElementById('processButtons'); if(!btns) return;
+  const detail=document.getElementById('processDetail'), flow=document.getElementById('processFlow'), code=document.getElementById('processCode'), pill=document.getElementById('processPill');
+  btns.innerHTML=processSteps.map((s,j)=>`<button class="btn ${j===i?'active':''}" onclick="renderProcess(${j})" style="font-size:12px;padding:10px 8px;min-height:54px"><b>${j+1}</b><br>${s.t}</button>`).join('');
+  const s=processSteps[i];
+  pill.textContent=`Step ${i+1} / ${processSteps.length}`;
+  detail.innerHTML=`<div class="small" style="text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:#9eefff">Current layer</div><div class="big-number" style="font-size:34px;color:var(--cyan);line-height:1.05;margin:7px 0 10px">${s.t}</div><p style="font-size:18px;line-height:1.48;margin:0;color:#dceaff">${s.d}</p><div style="height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:20px"><span style="display:block;height:100%;width:${(i+1)/processSteps.length*100}%;background:linear-gradient(90deg,var(--cyan),var(--purple))"></span></div>`;
+  flow.innerHTML=processSteps.map((st,j)=>`<div class="flow-row" style="display:flex;align-items:center;gap:10px;border:1px solid ${j<=i?'rgba(39,243,160,.38)':'rgba(255,255,255,.10)'};background:${j<=i?'rgba(39,243,160,.075)':'rgba(255,255,255,.035)'}"><div style="min-width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:${j<=i?'var(--green)':'rgba(255,255,255,.12)'};color:#061022;font-weight:950;font-size:13px">${j+1}</div><div><b>${st.t}</b><div class="small">${st.flow}</div></div></div>`).join('');
+  code.textContent=s.code;
+}
+
+// events
+initNav(); updateUI(); loadIframeForSlide(0); renderProcess(0);
+document.getElementById('nextBtn').onclick=nextSlide; document.getElementById('prevBtn').onclick=prevSlide; document.getElementById('modeBtn').onclick=toggleMode; document.getElementById('fullBtn').onclick=fullScreen; document.getElementById('overviewBtn').onclick=openOverview; document.getElementById('closeOverview').onclick=closeOverview; document.getElementById('resetAssignmentsBtn').onclick=resetAssignments; document.getElementById('copyAssignmentsBtn').onclick=copyAssignments;
+document.addEventListener('keydown',e=>{
+  if(e.target && ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName)) return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){nextSlide();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){prevSlide();}
+  else if(e.key.toLowerCase()==='p'){toggleMode();}
+  else if(e.key.toLowerCase()==='f'){fullScreen();}
+  else if(e.key.toLowerCase()==='o'){openOverview();}
+  else if(e.key==='Escape'){closeOverview();}
+  else if(/^\d$/.test(e.key)){const num=parseInt(e.key,10); if(num>0) go(Math.min(num-1,slides.length-1));}
+});
+</script>
+</body>
+</html>
